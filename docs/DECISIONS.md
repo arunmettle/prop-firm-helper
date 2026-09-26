@@ -24,3 +24,10 @@ One line each: decision — why.
 - CSV stop/target of 0 = none. A stop at or beyond entry (trailed to breakeven/profit) is dropped, because it says nothing about the initial risk.
 - Sensitive-column detection is conservative (header patterns + email values + constant 6–12 digit numbers); dropped columns are shown to the user and cannot be mapped. The server additionally accepts only a strict whitelist of keys (`z.strictObject`), rejecting anything else.
 - Import idempotency key = sha256(instrument | openedAt | entry | size) with a unique index on (user_id, import_hash); re-imports report duplicates.
+- Jev docs (developers.cloudflare.com, docs.typesafe.ai) were blocked by the build environment's egress proxy. The Cloudflare adapter follows the standard Workers AI REST envelope (`{success, result}`) and accepts answers at `result.answers` or `result` — UNVERIFIED, must be checked before production. The direct TypeSafe adapter is a stub that throws a clear, non-retryable error.
+- `JevClient.evaluate` returns `{answers, usage, latencyMs, provider}` rather than bare answers, so usage can be tracked per call.
+- Jev response validation is strict on the fields we use (`noul` in [0,1]; `choice` must be a defined key; `score` an integer index; confidences in [0,1]) and lenient on `legend`/`probabilities` whose exact shape we couldn't verify.
+- Note classification runs NOTE_CLASSIFIER_V1 + BEHAVIOUR_V1 (+ override_justified when flagged) in ONE Jev call per trade. Trades with no note text are not sent to Jev (`labels_status = none`).
+- Classification failure → `labels_status = failed`, no labels stored, "couldn't classify" in the UI, re-label button. If `keepRawNotes` is off, notes are removed only AFTER a successful classification (a failed trade keeps its note until it can be labelled).
+- Editing a trade re-queues classification (the state includes r_multiple/exit type, which may have changed).
+- Low-confidence values are stored with an `uncertain: true` flag per value; aggregates count them separately.

@@ -1,13 +1,14 @@
 import { loadConfig } from './config.js';
 import { createDb } from './db/client.js';
 import { createEmailSender } from './lib/email.js';
+import { createJevFromConfig } from './services/jev.js';
 import type { AppCtx } from './ctx.js';
 import { processNext, requeueStale } from './jobs/queue.js';
 import { handlers } from './jobs/handlers.js';
 
 const cfg = loadConfig();
 const { db, pool } = createDb(cfg.databaseUrl);
-const ctx: AppCtx = { cfg, db, email: createEmailSender(cfg) };
+const ctx: AppCtx = { cfg, db, email: createEmailSender(cfg), jev: createJevFromConfig(cfg) };
 
 let running = true;
 const stop = () => {

@@ -1,7 +1,9 @@
 import type { HandlerSet } from './queue.js';
+import { labelTradesJob } from '../services/labelling.js';
 
-/** Job handlers are registered here as features land. */
 export const handlers: HandlerSet = {
-  run: {},
+  run: {
+    label_trades: labelTradesJob,
+  },
   onFinalFailure: {},
 };

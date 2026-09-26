@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
-import { useQuery } from '@tanstack/react-query';
-import { ListOrdered, Plus } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ListOrdered, Plus, RefreshCw } from 'lucide-react';
 import { api } from '../lib/api';
 import { useActiveAccount } from '../components/AccountSwitcher';
 import { TradeTable } from '../components/TradeTable';
@@ -30,7 +30,13 @@ export function TradesPage() {
     queryFn: () => api.get<string[]>(`/api/trades/setup-tags?accountId=${account!.id}`),
     enabled: !!account,
   });
+  const qc = useQueryClient();
+  const relabel = useMutation({
+    mutationFn: () => api.post<{ queued: number }>('/api/trades/relabel', { accountId: account!.id }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['trades'] }),
+  });
   if (!account) return <Spinner />;
+  const needsRelabel = q.data?.trades.some((t) => t.labelsStatus === 'failed');
   const filtered = outcome !== 'all' || setup || override !== 'any' || from || to;
 
   return (
@@ -39,11 +45,22 @@ export function TradesPage() {
         title="Trades"
         description={q.data ? `${q.data.total} trade${q.data.total === 1 ? '' : 's'} in ${account.label}` : undefined}
         actions={
+          <>
+          <Button
+            variant="ghost"
+            icon={<RefreshCw className="size-4" />}
+            loading={relabel.isPending}
+            onClick={() => relabel.mutate()}
+            title="Re-run note classification for failed or outdated labels"
+          >
+            {needsRelabel ? 'Retry classification' : 'Re-label notes'}
+          </Button>
           <Link to="/trades/new">
             <Button variant="primary" icon={<Plus className="size-4" />}>
               Log trade <Kbd>N</Kbd>
             </Button>
           </Link>
+          </>
         }
       />
       <Card bodyClassName="p-0">

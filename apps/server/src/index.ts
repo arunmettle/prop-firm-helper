@@ -5,12 +5,13 @@ import fastifyStatic from '@fastify/static';
 import { loadConfig } from './config.js';
 import { createDb } from './db/client.js';
 import { createEmailSender } from './lib/email.js';
+import { createJevFromConfig } from './services/jev.js';
 import { buildApp } from './app.js';
 import type { AppCtx } from './ctx.js';
 
 const cfg = loadConfig();
 const { db } = createDb(cfg.databaseUrl);
-const ctx: AppCtx = { cfg, db, email: createEmailSender(cfg) };
+const ctx: AppCtx = { cfg, db, email: createEmailSender(cfg), jev: createJevFromConfig(cfg) };
 const app = await buildApp(ctx, { logger: true });
 
 // In production the API also serves the built web app (single origin, cookies stay first-party).

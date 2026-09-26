@@ -2,6 +2,7 @@ import { and, asc, desc, eq, gte, isNotNull, isNull, lt, lte, gt, sql, type SQL 
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { tradeInputSchema } from '@cooldown/core';
+import { NOTE_LABELS_VERSION } from '@cooldown/core/jev';
 import type { AppCtx } from '../ctx.js';
 import { prechecks, trades } from '../db/schema.js';
 import { currentUser, requireUser } from '../lib/auth.js';
@@ -80,10 +81,30 @@ export async function tradeRoutes(app: FastifyInstance, ctx: AppCtx) {
           .where(and(eq(prechecks.id, body.precheckId), eq(prechecks.userId, user.id), eq(prechecks.accountId, account.id)));
       }
       await onTradesChanged(ctx, tx, user.id, [t!.id]);
-      return t!;
+      return (await ownedTrade(tx, user.id, t!.id));
     });
     return { trade: tradeDto(trade), warnings };
   });
+
+  // Re-run note classification (e.g. after a question-set version bump or failures). Calls Jev → rate limited.
+  app.post(
+    '/api/trades/relabel',
+    { ...pre, config: { rateLimit: { max: 3, timeWindow: '1 minute' } } },
+    async (req) => {
+      const user = currentUser(req);
+      const body = parse(z.object({ accountId: z.uuid(), scope: z.enum(['failed_or_outdated', 'all']).default('failed_or_outdated') }), req.body);
+      await ownedAccount(ctx.db, user.id, body.accountId);
+      const rows = await ctx.db
+        .select({ id: trades.id, status: trades.labelsStatus, version: trades.labelsVersion })
+        .from(trades)
+        .where(and(eq(trades.userId, user.id), eq(trades.accountId, body.accountId)));
+      const ids = rows
+        .filter((r) => body.scope === 'all' || r.status === 'failed' || r.status === 'pending' || (r.status === 'done' && r.version !== NOTE_LABELS_VERSION))
+        .map((r) => r.id);
+      await ctx.db.transaction((tx) => onTradesChanged(ctx, tx, user.id, ids));
+      return { queued: ids.length };
+    },
+  );
 
   app.get<IdParams>('/api/trades/:id', pre, async (req) => {
     const user = currentUser(req);
@@ -104,7 +125,7 @@ export async function tradeRoutes(app: FastifyInstance, ctx: AppCtx) {
         .returning();
       // Anything the classifier reads may have changed → re-label.
       await onTradesChanged(ctx, tx, user.id, [t!.id]);
-      return t!;
+      return ownedTrade(tx, user.id, t!.id);
     });
     return { trade: tradeDto(trade), warnings };
   });

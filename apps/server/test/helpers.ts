@@ -6,6 +6,9 @@ import { createDb } from '../src/db/client.js';
 import { runMigrations } from '../src/db/migrate.js';
 import { MemoryEmailSender } from '../src/lib/email.js';
 import type { AppCtx } from '../src/ctx.js';
+import { createJevClient, FakeJevTransport, type JevClient } from '@cooldown/core/jev';
+import { drain } from '../src/jobs/queue.js';
+import { handlers } from '../src/jobs/handlers.js';
 
 const TEST_URL = process.env.TEST_DATABASE_URL ?? 'postgres://cooldown:cooldown@localhost:5432/cooldown_test';
 
@@ -16,7 +19,7 @@ export interface TestEnv {
   close: () => Promise<void>;
 }
 
-export async function setupTestEnv(env: Record<string, string> = {}): Promise<TestEnv> {
+export async function setupTestEnv(env: Record<string, string> = {}, jev?: JevClient): Promise<TestEnv> {
   const cfg = loadConfig({
     NODE_ENV: 'test',
     DATABASE_URL: TEST_URL,
@@ -30,7 +33,7 @@ export async function setupTestEnv(env: Record<string, string> = {}): Promise<Te
   await runMigrations(db);
   await db.execute(sql`truncate users, login_tokens, jobs cascade`);
   const email = new MemoryEmailSender();
-  const ctx = { cfg, db, email } as AppCtx;
+  const ctx: AppCtx = { cfg, db, email, jev: jev ?? createJevClient(new FakeJevTransport(), { sleep: async () => {} }) };
   const app = await buildApp(ctx, { logger: true });
   return {
     ctx,
@@ -55,3 +58,6 @@ export async function signIn(env: TestEnv, email: string): Promise<string> {
   const raw = Array.isArray(setCookie) ? setCookie[0]! : setCookie!;
   return raw.split(';')[0]!;
 }
+
+/** Run all queued jobs (labelling, simulations) synchronously. */
+export const runJobs = (env: TestEnv) => drain(env.ctx, handlers);

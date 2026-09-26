@@ -10,6 +10,7 @@ import { AccountFormPage } from './pages/AccountForm';
 import { TradesPage } from './pages/Trades';
 import { TradeFormPage } from './pages/TradeForm';
 import { ImportPage } from './pages/Import';
+import { AdminPage } from './pages/Admin';
 
 export function App() {
   const me = useMe();
@@ -26,6 +27,7 @@ export function App() {
         <Route path="/trades/new" element={<TradeFormPage key="new" />} />
         <Route path="/trades/:id" element={<TradeFormPage />} />
         <Route path="/import" element={<ImportPage />} />
+        <Route path="/admin" element={<AdminPage />} />
         <Route path="/accounts/:id" element={<AccountFormPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
