@@ -81,7 +81,7 @@ export function SettingsPage() {
             >
               <span
                 className={cn(
-                  'absolute top-0.5 size-5 rounded-full bg-white shadow transition-transform',
+                  'absolute top-0.5 left-0 size-5 rounded-full bg-white shadow transition-transform',
                   s.keepRawNotes ? 'translate-x-[22px]' : 'translate-x-0.5',
                 )}
               />
