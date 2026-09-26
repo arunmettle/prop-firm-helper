@@ -1,0 +1,37 @@
+{
+  "name": "cooldown",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "node scripts/db-up.mjs && pnpm db:migrate && concurrently -k -n server,worker,web -c blue,magenta,green \"pnpm --filter @cooldown/server dev\" \"pnpm --filter @cooldown/server dev:worker\" \"pnpm --filter @cooldown/web dev\"",
+    "db:up": "node scripts/db-up.mjs",
+    "db:generate": "pnpm --filter @cooldown/server db:generate",
+    "db:migrate": "pnpm --filter @cooldown/server db:migrate",
+    "seed": "pnpm --filter @cooldown/server seed",
+    "admin:grant": "pnpm --filter @cooldown/server admin:grant",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "test": "pnpm -r test",
+    "test:e2e": "playwright test",
+    "ci": "pnpm typecheck && pnpm lint && pnpm test && pnpm build"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@playwright/test": "~1.56.1",
+    "concurrently": "^10.0.5",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.9",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.70.1",
+    "vitest": "^5.0.2"
+  }
+}

@@ -1,0 +1,73 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+
+/* Design tokens. Calm, low-chroma dark UI with one teal accent; semantic colours only for verdicts/status. */
+@theme {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace;
+
+  --color-bg: #0b0f14;
+  --color-surface: #11161d;
+  --color-surface-2: #161c25;
+  --color-surface-3: #1d2530;
+  --color-line: #232c38;
+  --color-line-strong: #2f3a48;
+  --color-fg: #e6ebf1;
+  --color-fg-muted: #9aa6b4;
+  --color-fg-subtle: #6b7785;
+
+  --color-accent: #5eead4;
+  --color-accent-strong: #2dd4bf;
+  --color-accent-ink: #042f2e;
+  --color-accent-soft: rgb(94 234 212 / 0.1);
+
+  --color-go: #34d399;
+  --color-go-soft: rgb(52 211 153 / 0.12);
+  --color-caution: #fbbf24;
+  --color-caution-soft: rgb(251 191 36 / 0.12);
+  --color-stop: #fb7185;
+  --color-stop-soft: rgb(251 113 133 / 0.12);
+  --color-info: #93c5fd;
+
+  --radius-card: 14px;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    background: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-feature-settings: 'cv11', 'ss01';
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection {
+    background: rgb(94 234 212 / 0.25);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type='number'] {
+    -moz-appearance: textfield;
+  }
+}
+
+@utility num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum', 'cv11';
+}
+
+@utility scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}

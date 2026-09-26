@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cooldown
+      POSTGRES_PASSWORD: cooldown
+      POSTGRES_DB: cooldown
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./scripts/init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U cooldown']
+      interval: 2s
+      timeout: 3s
+      retries: 20
+volumes:
+  pgdata:
