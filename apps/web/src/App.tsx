@@ -7,6 +7,8 @@ import { VerifyPage } from './pages/Verify';
 import { DashboardPage } from './pages/Dashboard';
 import { AccountsPage } from './pages/Accounts';
 import { AccountFormPage } from './pages/AccountForm';
+import { TradesPage } from './pages/Trades';
+import { TradeFormPage } from './pages/TradeForm';
 
 export function App() {
   const me = useMe();
@@ -19,6 +21,9 @@ export function App() {
       <Routes>
         <Route path="/" element={<DashboardPage />} />
         <Route path="/accounts" element={<AccountsPage />} />
+        <Route path="/trades" element={<TradesPage />} />
+        <Route path="/trades/new" element={<TradeFormPage key="new" />} />
+        <Route path="/trades/:id" element={<TradeFormPage />} />
         <Route path="/accounts/:id" element={<AccountFormPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -1,4 +1,4 @@
-import clsx from 'clsx';
+import { cn as clsx } from '../lib/cn';
 import { forwardRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
 import { Info, Loader2 } from 'lucide-react';
 import { DISCLAIMER } from '@cooldown/core';
@@ -103,6 +103,7 @@ export function Card({
   children,
   className,
   bodyClassName,
+  collapsed,
 }: {
   title?: ReactNode;
   subtitle?: ReactNode;
@@ -110,11 +111,12 @@ export function Card({
   children?: ReactNode;
   className?: string;
   bodyClassName?: string;
+  collapsed?: boolean;
 }) {
   return (
     <section className={clsx('rounded-[var(--radius-card)] border border-line bg-surface', className)}>
       {(title || actions) && (
-        <header className="flex items-start justify-between gap-4 border-b border-line px-5 py-3.5">
+        <header className={clsx('flex items-start justify-between gap-4 px-5 py-3.5', !collapsed && 'border-b border-line')}>
           <div>
             {title && <h2 className="text-[14px] font-semibold text-fg">{title}</h2>}
             {subtitle && <p className="mt-0.5 text-xs text-fg-subtle">{subtitle}</p>}
@@ -122,7 +124,7 @@ export function Card({
           {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
         </header>
       )}
-      <div className={clsx('p-5', bodyClassName)}>{children}</div>
+      {!collapsed && <div className={clsx('p-5', bodyClassName)}>{children}</div>}
     </section>
   );
 }
