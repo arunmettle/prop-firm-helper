@@ -105,7 +105,8 @@ export interface PrecheckComputed {
 
 export interface PrecheckJevView {
   status: 'ok' | 'failed' | 'skipped';
-  tilt_risk?: { value: string; score: number; confidence: number; uncertain: boolean };
+  /** `score` = nearest rubric level (0..2); `raw` = Jev's fractional position. */
+  tilt_risk?: { value: string; score: number; raw?: number; confidence: number; uncertain: boolean };
   matches_stated_setup?: { p: number; uncertain: boolean };
   likely_impulse?: { p: number; uncertain: boolean };
 }

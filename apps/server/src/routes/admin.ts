@@ -25,6 +25,7 @@ export async function adminRoutes(app: FastifyInstance, ctx: AppCtx) {
         failures: sql<number>`sum(${jevUsage.failures})::int`,
         inputTokens: sql<number>`sum(${jevUsage.inputTokens})::int`,
         outputTokens: sql<number>`sum(${jevUsage.outputTokens})::int`,
+        costUsd: sql<number>`(sum(${jevUsage.costMicros}) / 1000000.0)::float8`,
       })
       .from(jevUsage)
       .innerJoin(users, eq(users.id, jevUsage.userId))

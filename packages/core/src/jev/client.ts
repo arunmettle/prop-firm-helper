@@ -29,6 +29,7 @@ export function createJevClient(transport: JevTransport, opts: RetryOptions = {}
             usage: {
               input_tokens: raw.usage?.input_tokens ?? 0,
               output_tokens: raw.usage?.output_tokens ?? 0,
+              cost: raw.usage?.cost ?? 0,
             },
             latencyMs: Math.round(now() - t0),
             provider: transport.provider,

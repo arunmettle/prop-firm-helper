@@ -70,4 +70,5 @@ Every phase ends with: typecheck ✅ lint ✅ tests ✅ app boots ✅ → commit
 - [x] Playwright smoke test, README, HANDOFF, NEXT
 
 ## Status
+
 All ten phases are complete. `pnpm verify` (typecheck, lint, 205 unit/integration tests, build) and `pnpm test:e2e` pass. See HANDOFF.md.

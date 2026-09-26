@@ -1,4 +1,4 @@
-import { isUncertain } from './validate.js';
+import { isUncertain, scoreLevel } from './validate.js';
 import type { Answers } from './types.js';
 import { BEHAVIOUR_V1, NOTE_CLASSIFIER_V1, NOTE_LABELS_VERSION, OVERRIDE_JUSTIFIED_V1 } from './questions.js';
 
@@ -7,7 +7,8 @@ export interface NoteLabels {
   version: string;
   primary_driver: { value: string; confidence: number; uncertain: boolean };
   followed_own_plan: { p: number; uncertain: boolean };
-  impulsiveness: { value: string; score: number; confidence: number; uncertain: boolean };
+  /** `score` = nearest level (0..2); `raw` = Jev's fractional position. */
+  impulsiveness: { value: string; score: number; raw?: number; confidence: number; uncertain: boolean };
   override_justified?: { p: number; uncertain: boolean };
   tilt_behaviour: { p: number; uncertain: boolean };
 }
@@ -23,6 +24,7 @@ export function toNoteLabels(
   a: Answers<typeof LABEL_QUESTIONS> & Partial<Answers<typeof OVERRIDE_JUSTIFIED_V1>>,
 ): NoteLabels {
   const imp = a.impulsiveness;
+  const lvl = scoreLevel(imp.score, NOTE_CLASSIFIER_V1.impulsiveness.criteria.length);
   return {
     version: NOTE_LABELS_VERSION,
     primary_driver: {
@@ -32,8 +34,9 @@ export function toNoteLabels(
     },
     followed_own_plan: { p: a.followed_own_plan.noul, uncertain: isUncertain(a.followed_own_plan) },
     impulsiveness: {
-      value: NOTE_CLASSIFIER_V1.impulsiveness.criteria[imp.score] ?? String(imp.score),
-      score: imp.score,
+      value: NOTE_CLASSIFIER_V1.impulsiveness.criteria[lvl]!,
+      score: lvl,
+      raw: imp.score,
       confidence: imp.confidence,
       uncertain: isUncertain(imp),
     },

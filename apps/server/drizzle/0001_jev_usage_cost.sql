@@ -1,0 +1,1 @@
+ALTER TABLE "jev_usage" ADD COLUMN "cost_micros" bigint DEFAULT 0 NOT NULL;

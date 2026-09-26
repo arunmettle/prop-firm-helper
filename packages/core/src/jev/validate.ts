@@ -19,9 +19,9 @@ function schemaFor(q: Questions[string]): z.ZodType {
     case 'score':
       return z.object({
         type: z.literal('score').optional(),
+        // Jev returns a fractional score (probability-weighted position), e.g. 0.69 on a 3-level rubric.
         score: z
           .number()
-          .int()
           .min(0)
           .max(q.criteria.length - 1),
         confidence: prob,
@@ -48,3 +48,7 @@ export function isUncertain(a: { type: string; noul?: number; confidence?: numbe
   if (a.type === 'noul') return a.noul! > 0.35 && a.noul! < 0.65;
   return (a.confidence ?? 0) < 0.6;
 }
+
+/** Nearest rubric level for a (possibly fractional) score. */
+export const scoreLevel = (score: number, levels: number): number =>
+  Math.max(0, Math.min(levels - 1, Math.round(score)));

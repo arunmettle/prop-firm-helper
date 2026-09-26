@@ -78,3 +78,13 @@ describe('health + auth', () => {
     expect(codes).toContain(429);
   });
 });
+
+import { loadConfig } from '../src/config.js';
+describe('jev provider selection', () => {
+  it('auto-selects OpenRouter when its key is set, otherwise the fake', () => {
+    expect(loadConfig({ OPENROUTER_API_KEY: 'sk-or-x' }).jev.provider).toBe('openrouter');
+    expect(loadConfig({}).jev.provider).toBe('fake');
+    expect(loadConfig({ OPENROUTER_API_KEY: 'sk-or-x', JEV_PROVIDER: 'fake' }).jev.provider).toBe('fake');
+    expect(loadConfig({}).jev.openrouterModel).toBe('typesafe/jev-1.13');
+  });
+});

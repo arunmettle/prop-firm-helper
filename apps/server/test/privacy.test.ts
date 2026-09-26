@@ -93,7 +93,8 @@ describe('hard delete', () => {
     ).toBe(400);
   });
   it('removes every row for the user in one go and leaves other users untouched', async () => {
-    const rows = (await env.ctx.db.execute(sql`select id from users where email = 'priv-a@example.com'`)).rows as { id: string }[];
+    const rows = (await env.ctx.db.execute(sql`select id from users where email = 'priv-a@example.com'`))
+      .rows as { id: string }[];
     const id = rows[0]!.id;
     const r = await env.app.inject({
       method: 'POST',

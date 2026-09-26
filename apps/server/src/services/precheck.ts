@@ -16,7 +16,7 @@ import {
   type PrecheckInput,
   type PrecheckJevView,
 } from '@cooldown/core';
-import { isUncertain, PRECHECK_V1 } from '@cooldown/core/jev';
+import { isUncertain, PRECHECK_V1, scoreLevel } from '@cooldown/core/jev';
 import type { AppCtx } from '../ctx.js';
 import { prechecks, trades, type Account, type User } from '../db/schema.js';
 import { HttpError } from '../lib/http.js';
@@ -132,11 +132,14 @@ export async function runPrecheck(
   try {
     const r = await callJev(ctx, user.id, 'precheck', state, PRECHECK_V1);
     const a = r.answers;
+    // Jev's score is fractional; the verdict works on the nearest rubric level (0 Low, 1 Elevated, 2 High).
+    const tiltLevel = scoreLevel(a.tilt_risk.score, PRECHECK_V1.tilt_risk.criteria.length);
     jev = {
       status: 'ok',
       tilt_risk: {
-        value: PRECHECK_V1.tilt_risk.criteria[a.tilt_risk.score] ?? String(a.tilt_risk.score),
-        score: a.tilt_risk.score,
+        value: PRECHECK_V1.tilt_risk.criteria[tiltLevel]!,
+        score: tiltLevel,
+        raw: a.tilt_risk.score,
         confidence: a.tilt_risk.confidence,
         uncertain: isUncertain(a.tilt_risk),
       },

@@ -1,5 +1,8 @@
 import type { JevTransport, Questions } from './types.js';
 
+/** Like real Jev, scores are fractional: nudge a level by up to ±0.2 (never crossing to another level). */
+const frac = (level: number, x: number): number => Math.min(2, Math.max(0, level + (x - 0.5) * 0.4));
+
 /** FNV-1a 32-bit → [0, 1). Deterministic, isomorphic (no node:crypto). */
 export function hashUnit(s: string): number {
   let h = 0x811c9dc5;
@@ -118,12 +121,12 @@ export class FakeJevTransport implements JevTransport {
           noul: note.driver === 'plan' ? 0.8 + u(key) * 0.15 : tilted ? 0.08 + u(key) * 0.15 : 0.5,
         };
       case 'impulsiveness': {
-        const score = note.driver === 'plan' ? 0 : tilted ? 2 : 1;
+        const level = note.driver === 'plan' ? 0 : tilted ? 2 : 1;
         return {
           type: 'score',
-          score,
+          score: frac(level, u(key + 'f')),
           confidence: 0.66 + u(key) * 0.25,
-          legend: q.type === 'score' ? q.criteria[score] : undefined,
+          legend: q.type === 'score' ? q.criteria[level] : undefined,
         };
       }
       case 'override_justified':
@@ -143,7 +146,7 @@ export class FakeJevTransport implements JevTransport {
         if (consec >= 2 || (sinceLoss !== null && sinceLoss < 15) || (tilted && consec >= 1)) score = 2;
         return {
           type: 'score',
-          score,
+          score: frac(score, u(key + 'f')),
           confidence: 0.64 + u(key) * 0.3,
           legend: q.type === 'score' ? q.criteria[score] : undefined,
         };

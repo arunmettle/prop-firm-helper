@@ -3,6 +3,7 @@ import {
   CloudflareJevTransport,
   createJevClient,
   FakeJevTransport,
+  OpenRouterJevTransport,
   TypesafeJevTransport,
   type JevClient,
   type JevResult,
@@ -14,6 +15,13 @@ import { jevUsage } from '../db/schema.js';
 
 export function createJevFromConfig(cfg: Config): JevClient {
   switch (cfg.jev.provider) {
+    case 'openrouter':
+      return createJevClient(
+        new OpenRouterJevTransport(cfg.jev.openrouterApiKey, cfg.jev.openrouterModel, {
+          appUrl: cfg.appUrl,
+          appName: 'Cooldown',
+        }),
+      );
     case 'cloudflare':
       return createJevClient(
         new CloudflareJevTransport(cfg.jev.cloudflareAccountId, cfg.jev.cloudflareApiToken),
@@ -40,8 +48,9 @@ export async function callJev<Q extends Questions>(
   const day = new Date().toISOString().slice(0, 10);
   try {
     const r = await ctx.jev.evaluate(state, questions);
+    const costMicros = Math.round((r.usage.cost ?? 0) * 1_000_000);
     console.info(
-      `[jev] purpose=${purpose} provider=${r.provider} keys=${keys} latency_ms=${r.latencyMs} input_tokens=${r.usage.input_tokens} output_tokens=${r.usage.output_tokens}`,
+      `[jev] purpose=${purpose} provider=${r.provider} keys=${keys} latency_ms=${r.latencyMs} input_tokens=${r.usage.input_tokens} output_tokens=${r.usage.output_tokens} cost_usd=${(r.usage.cost ?? 0).toFixed(6)}`,
     );
     await ctx.db
       .insert(jevUsage)
@@ -51,6 +60,7 @@ export async function callJev<Q extends Questions>(
         calls: 1,
         inputTokens: r.usage.input_tokens,
         outputTokens: r.usage.output_tokens,
+        costMicros,
       })
       .onConflictDoUpdate({
         target: [jevUsage.userId, jevUsage.day],
@@ -58,6 +68,7 @@ export async function callJev<Q extends Questions>(
           calls: sql`${jevUsage.calls} + 1`,
           inputTokens: sql`${jevUsage.inputTokens} + ${r.usage.input_tokens}`,
           outputTokens: sql`${jevUsage.outputTokens} + ${r.usage.output_tokens}`,
+          costMicros: sql`${jevUsage.costMicros} + ${costMicros}`,
           updatedAt: new Date(),
         },
       });

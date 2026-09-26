@@ -30,6 +30,7 @@ export interface ChoiceAnswer<K extends string = string> {
 }
 export interface ScoreAnswer<L extends string = string> {
   type: 'score';
+  /** Position on the rubric: 0..n-1. May be FRACTIONAL (a probability-weighted mean) — use `scoreLevel()`. */
   score: number;
   confidence: number;
   legend?: L | unknown;
@@ -46,9 +47,13 @@ export type AnswerFor<Q> = Q extends { type: 'noul' }
 
 export type Answers<Q extends Questions> = { [K in keyof Q]: AnswerFor<Q[K]> };
 
+export type JevProvider = 'openrouter' | 'cloudflare' | 'typesafe' | 'fake';
+
 export interface JevUsage {
   input_tokens: number;
   output_tokens: number;
+  /** Provider-reported cost in USD, when available (OpenRouter). */
+  cost?: number;
 }
 
 export interface JevResult<Q extends Questions> {
@@ -59,13 +64,13 @@ export interface JevResult<Q extends Questions> {
 }
 
 export interface JevClient {
-  readonly provider: 'cloudflare' | 'typesafe' | 'fake';
+  readonly provider: JevProvider;
   evaluate<Q extends Questions>(state: unknown, questions: Q): Promise<JevResult<Q>>;
 }
 
 /** Raw adapter: returns the unvalidated answer map + usage. Validation and retries are layered on top. */
 export interface JevTransport {
-  readonly provider: 'cloudflare' | 'typesafe' | 'fake';
+  readonly provider: JevProvider;
   call(state: unknown, questions: Questions): Promise<{ answers: unknown; usage?: Partial<JevUsage> }>;
 }
 

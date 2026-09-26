@@ -4,7 +4,14 @@ import { Card, ErrorBox, PageHeader, Spinner, Stat } from '../components/ui';
 
 interface Usage {
   provider: string;
-  users: { email: string; calls: number; failures: number; inputTokens: number; outputTokens: number }[];
+  users: {
+    email: string;
+    calls: number;
+    failures: number;
+    inputTokens: number;
+    outputTokens: number;
+    costUsd: number;
+  }[];
   jobs: { queued: number; running: number; failed: number };
   simulations: number;
   creditsSold: number;
@@ -42,6 +49,7 @@ export function AdminPage() {
                   <th className="px-4 py-2.5 text-right font-medium">Failures</th>
                   <th className="px-4 py-2.5 text-right font-medium">Input tokens</th>
                   <th className="px-4 py-2.5 text-right font-medium">Output tokens</th>
+                  <th className="px-4 py-2.5 text-right font-medium">Cost (USD)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
@@ -52,11 +60,12 @@ export function AdminPage() {
                     <td className="num px-4 py-2.5 text-right">{u.failures.toLocaleString()}</td>
                     <td className="num px-4 py-2.5 text-right">{u.inputTokens.toLocaleString()}</td>
                     <td className="num px-4 py-2.5 text-right">{u.outputTokens.toLocaleString()}</td>
+                    <td className="num px-4 py-2.5 text-right">${(u.costUsd ?? 0).toFixed(4)}</td>
                   </tr>
                 ))}
                 {!q.data.users.length && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-6 text-center text-fg-muted">
+                    <td colSpan={6} className="px-4 py-6 text-center text-fg-muted">
                       No usage yet.
                     </td>
                   </tr>

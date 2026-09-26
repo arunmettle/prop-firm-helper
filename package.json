@@ -20,7 +20,8 @@
     "format": "prettier --write .",
     "test": "pnpm -r test",
     "test:e2e": "playwright test",
-    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm build"
+    "verify": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",
+    "jev:ping": "pnpm --filter @cooldown/server jev:ping"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

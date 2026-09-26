@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm';
 import {
+  bigint,
   boolean,
   index,
   integer,
@@ -223,6 +224,8 @@ export const jevUsage = pgTable(
     failures: integer('failures').notNull().default(0),
     inputTokens: integer('input_tokens').notNull().default(0),
     outputTokens: integer('output_tokens').notNull().default(0),
+    /** Provider-reported cost in millionths of a USD (OpenRouter returns usage.cost). */
+    costMicros: bigint('cost_micros', { mode: 'number' }).notNull().default(0),
     ...timestamps,
   },
   (t) => [uniqueIndex('jev_usage_user_day_uq').on(t.userId, t.day)],

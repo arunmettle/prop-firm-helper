@@ -13,7 +13,12 @@ const envSchema = z.object({
   ADMIN_EMAILS: z.string().default(''),
   RESEND_API_KEY: z.string().default(''),
   EMAIL_FROM: z.string().default('Cooldown <login@example.com>'),
-  JEV_PROVIDER: z.enum(['cloudflare', 'typesafe', 'fake']).optional(),
+  JEV_PROVIDER: z.preprocess(
+    (v) => (v === '' ? undefined : v),
+    z.enum(['openrouter', 'cloudflare', 'typesafe', 'fake']).optional(),
+  ),
+  OPENROUTER_API_KEY: z.string().default(''),
+  OPENROUTER_JEV_MODEL: z.string().default('typesafe/jev-1.13'),
   CLOUDFLARE_ACCOUNT_ID: z.string().default(''),
   CLOUDFLARE_API_TOKEN: z.string().default(''),
   TYPESAFE_API_KEY: z.string().default(''),
@@ -35,14 +40,16 @@ export type Config = ReturnType<typeof loadConfig>;
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env) {
   const e = envSchema.parse(env);
-  // Default to the deterministic fake when no credentials are present.
+  // Empty/unset JEV_PROVIDER = auto: OpenRouter if its key is set, then Cloudflare, else the deterministic fake.
   const jevProvider =
     e.JEV_PROVIDER ??
-    (e.CLOUDFLARE_API_TOKEN && e.CLOUDFLARE_ACCOUNT_ID
-      ? 'cloudflare'
-      : e.TYPESAFE_API_KEY
-        ? 'typesafe'
-        : 'fake');
+    (e.OPENROUTER_API_KEY
+      ? 'openrouter'
+      : e.CLOUDFLARE_API_TOKEN && e.CLOUDFLARE_ACCOUNT_ID
+        ? 'cloudflare'
+        : e.TYPESAFE_API_KEY
+          ? 'typesafe'
+          : 'fake');
   let packs: CreditPack[] = [];
   if (e.STRIPE_CREDIT_PACKS) packs = JSON.parse(e.STRIPE_CREDIT_PACKS) as CreditPack[];
   return {
@@ -57,6 +64,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env) {
     email: { resendApiKey: e.RESEND_API_KEY, from: e.EMAIL_FROM },
     jev: {
       provider: jevProvider,
+      openrouterApiKey: e.OPENROUTER_API_KEY,
+      openrouterModel: e.OPENROUTER_JEV_MODEL,
       cloudflareAccountId: e.CLOUDFLARE_ACCOUNT_ID,
       cloudflareApiToken: e.CLOUDFLARE_API_TOKEN,
       typesafeApiKey: e.TYPESAFE_API_KEY,

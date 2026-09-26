@@ -14,7 +14,8 @@
     "admin:grant": "tsx --env-file-if-exists=../../.env src/cli/grant.ts",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc -p tsconfig.json",
+    "jev:ping": "tsx --env-file-if-exists=../../.env src/cli/jev-ping.ts"
   },
   "dependencies": {
     "@cooldown/core": "workspace:*",

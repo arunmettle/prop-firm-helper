@@ -3,7 +3,7 @@
 A privacy-first web app for prop-firm traders. Log trades in seconds, run a pre-trade check against your own rules, see what you actually do after losses, and simulate your evaluation thousands of times to find the behaviour that decides the outcome.
 
 It never predicts the market, never asks for broker credentials, and every analytics screen says so:
-*Based on your own past trades. Past performance does not predict future results. Not financial advice.*
+_Based on your own past trades. Past performance does not predict future results. Not financial advice._
 
 ## Quick start (under 10 commands)
 
@@ -24,15 +24,15 @@ Without Docker: start any Postgres 16 with user/password/db `cooldown`, create a
 
 ## Commands
 
-| Command | What it does |
-| --- | --- |
-| `pnpm dev` | Postgres (if Docker is available), migrations, API, worker and web with reload |
-| `pnpm test` | Unit + integration tests (needs Postgres, uses `TEST_DATABASE_URL`) |
-| `pnpm test:e2e` | Playwright smoke test (sign in → 3 trades → check → simulation) |
-| `pnpm verify` | typecheck + lint + test + build (what CI runs) |
-| `pnpm db:migrate` / `pnpm db:generate` | Apply / generate Drizzle migrations |
-| `pnpm seed` | Demo data |
-| `pnpm admin:grant <email> <n>` | Grant simulation credits (used while payments are off) |
+| Command                                | What it does                                                                   |
+| -------------------------------------- | ------------------------------------------------------------------------------ |
+| `pnpm dev`                             | Postgres (if Docker is available), migrations, API, worker and web with reload |
+| `pnpm test`                            | Unit + integration tests (needs Postgres, uses `TEST_DATABASE_URL`)            |
+| `pnpm test:e2e`                        | Playwright smoke test (sign in → 3 trades → check → simulation)                |
+| `pnpm verify`                          | typecheck + lint + test + build (what CI runs)                                 |
+| `pnpm db:migrate` / `pnpm db:generate` | Apply / generate Drizzle migrations                                            |
+| `pnpm seed`                            | Demo data                                                                      |
+| `pnpm admin:grant <email> <n>`         | Grant simulation credits (used while payments are off)                         |
 
 ## Layout
 
@@ -49,7 +49,7 @@ samples/       Example MT4-style CSV (with account/name columns the importer dro
 
 See `.env.example`. Important switches:
 
-- `JEV_PROVIDER` — `fake` (default, deterministic, offline), `cloudflare` (needs `CLOUDFLARE_ACCOUNT_ID` + `CLOUDFLARE_API_TOKEN`), `typesafe` (stub, see DECISIONS).
+- **Jev via OpenRouter:** set `OPENROUTER_API_KEY` (and optionally `OPENROUTER_JEV_MODEL`, default `typesafe/jev-1.13`), then run `pnpm jev:ping` to check the key with a synthetic note. With no key the deterministic `fake` is used. `JEV_PROVIDER` can force `openrouter`, `cloudflare`, `typesafe` (stub) or `fake`.
 - `RESEND_API_KEY` — send real magic-link emails; empty = print to console.
 - `PAYMENTS_ENABLED` — Stripe Checkout for credit packs (test keys only) with `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_CREDIT_PACKS`. Webhook: `POST /api/stripe/webhook`.
 - `ADMIN_EMAILS` — who can open `/admin` (model usage and queue health).
