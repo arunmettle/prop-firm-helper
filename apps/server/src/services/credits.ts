@@ -19,3 +19,8 @@ export async function grantSignupCredits(db: Tx, userId: string, n: number): Pro
 export async function lockLedger(tx: Tx, userId: string): Promise<void> {
   await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${userId}))`);
 }
+
+export async function grantCredits(db: Tx, userId: string, n: number, refId: string): Promise<void> {
+  if (!Number.isInteger(n) || n <= 0) throw new Error('Credits must be a positive integer');
+  await db.insert(creditsLedger).values({ userId, delta: n, reason: 'admin_grant', refId });
+}
