@@ -19,3 +19,8 @@ One line each: decision — why.
 - Pass requires: target reached AND min trading days AND consistency rule satisfied, evaluated after each closed trade. Once passed/breached/timed out, the status is final (later trades only move the displayed balance).
 - Calendar-day limit: day N (1-based, from `accounts.start_date` or the first trade's day) > `maxCalendarDays` without a pass → `timed_out` (reported separately from rule breaches).
 - Instrument point values are config (`packages/core/src/trades/instruments.ts`); when the quote currency differs from the account currency we refuse to compute and ask for a user override instead of guessing an FX rate.
+- CSV import supports one-position-per-row exports (MT4 history, cTrader, spreadsheets). MT5 "deals" exports (separate in/out rows) are out of scope; users can export "positions" instead.
+- CSV slash dates are parsed day-first (DD/MM/YYYY), the usual broker-statement convention; ISO and `YYYY.MM.DD` (MT4) are unambiguous. The user picks the file's time zone (broker server time is often UTC+2/+3).
+- CSV stop/target of 0 = none. A stop at or beyond entry (trailed to breakeven/profit) is dropped, because it says nothing about the initial risk.
+- Sensitive-column detection is conservative (header patterns + email values + constant 6–12 digit numbers); dropped columns are shown to the user and cannot be mapped. The server additionally accepts only a strict whitelist of keys (`z.strictObject`), rejecting anything else.
+- Import idempotency key = sha256(instrument | openedAt | entry | size) with a unique index on (user_id, import_hash); re-imports report duplicates.

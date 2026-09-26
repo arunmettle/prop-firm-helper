@@ -1,0 +1,81 @@
+Ticket,Account,Name,Open Time,Type,Size,Item,Price,S / L,T / P,Close Time,Close Price,Commission,Profit,Comment
+7001000,51234567,Jo Trader,2026.06.01 07:00,sell,0.50,xauusd,2333.38,2343.38,2313.38,2026.06.01 08:00,2313.38,-3.50,1000,"London breakout retest, structure clean"
+7001001,51234567,Jo Trader,2026.06.02 09:00,buy,0.50,xauusd,2396.3,2383.3,2422.3,2026.06.02 09:28,2383.3,-3.50,-650,"London breakout retest, structure clean"
+7001002,51234567,Jo Trader,2026.06.02 09:52,sell,0.50,xauusd,2382.58,2391.58,2364.58,2026.06.02 10:35,2391.58,-3.50,-450,Asia range break with retest
+7001003,51234567,Jo Trader,2026.06.02 10:56,sell,1.00,xauusd,2370.04,2378.04,2354.04,2026.06.02 12:04,2360.44,-3.50,960,"Should have held last one, going bigger"
+7001004,51234567,Jo Trader,2026.06.03 09:00,sell,0.50,xauusd,2404.46,2416.46,2380.46,2026.06.03 10:49,2416.46,-3.50,-600,NY open liquidity sweep then reclaim
+7001005,51234567,Jo Trader,2026.06.03 10:55,buy,1.00,xauusd,2319.05,2307.05,2343.05,2026.06.03 12:27,2307.05,-3.50,-1200,"Missed the move, jumping in before it runs"
+7001006,51234567,Jo Trader,2026.06.04 07:00,buy,1.00,xauusd,2432.43,2419.43,2458.43,2026.06.04 08:38,2448.03,-3.50,1560,"Price is flying, getting in now"
+7001007,51234567,Jo Trader,2026.06.05 07:00,sell,0.50,xauusd,2315.45,2328.45,2289.45,2026.06.05 07:58,2328.45,-3.50,-650,"Pullback to 4h demand, confirmation candle"
+7001008,51234567,Jo Trader,2026.06.08 07:00,buy,1.00,xauusd,2390.61,2378.61,2414.61,2026.06.08 07:38,2378.61,-3.50,-1200,"Missed the move, jumping in before it runs"
+7001009,51234567,Jo Trader,2026.06.08 07:56,sell,0.50,xauusd,2404.58,2417.58,2378.58,2026.06.08 08:29,2378.58,-3.50,1300,"London breakout retest, structure clean"
+7001010,51234567,Jo Trader,2026.06.09 08:00,buy,0.50,xauusd,2412.06,2402.06,2432.06,2026.06.09 08:26,2432.06,-3.50,1000,Asia range break with retest
+7001011,51234567,Jo Trader,2026.06.09 11:08,sell,0.50,xauusd,2325.3,2335.3,2305.3,2026.06.09 12:12,2305.3,-3.50,1000,Asia range break with retest
+7001012,51234567,Jo Trader,2026.06.09 14:46,buy,0.50,xauusd,2347.4,2336.4,2369.4,2026.06.09 15:42,2369.4,-3.50,1100,"London breakout retest, structure clean"
+7001013,51234567,Jo Trader,2026.06.10 08:00,buy,0.50,xauusd,2389.02,2377.02,2413.02,2026.06.10 09:14,2377.02,-3.50,-600,"London breakout retest, structure clean"
+7001014,51234567,Jo Trader,2026.06.10 09:26,sell,1.00,xauusd,2335.31,2348.31,2309.31,2026.06.10 10:37,2340.51,-3.50,-520,"Should have held last one, going bigger"
+7001015,51234567,Jo Trader,2026.06.11 07:00,sell,1.00,xauusd,2446.99,2458.99,2422.99,2026.06.11 07:47,2458.99,-3.50,-1200,"Price is flying, getting in now"
+7001016,51234567,Jo Trader,2026.06.11 08:05,buy,1.00,xauusd,2368.93,2356.93,2392.93,2026.06.11 08:28,2364.13,-3.50,-480,"Price is flying, getting in now"
+7001017,51234567,Jo Trader,2026.06.12 08:00,buy,1.00,xauusd,2408.17,2397.17,2430.17,2026.06.12 09:36,2421.37,-3.50,1320,"Bored, small scalp"
+7001018,51234567,Jo Trader,2026.06.12 09:59,sell,0.50,xauusd,2380.54,2393.54,2354.54,2026.06.12 11:14,2393.54,-3.50,-650,Asia range break with retest
+7001019,51234567,Jo Trader,2026.06.12 11:20,sell,1.00,xauusd,2337.43,2349.43,2313.43,2026.06.12 13:04,2323.03,-3.50,1440,"Price is flying, getting in now"
+7001020,51234567,Jo Trader,2026.06.15 08:00,buy,0.50,xauusd,2361.13,2350.13,2383.13,2026.06.15 08:32,2383.13,-3.50,1100,"London breakout retest, structure clean"
+7001021,51234567,Jo Trader,2026.06.15 09:47,buy,0.50,xauusd,2384.09,2374.09,2404.09,2026.06.15 11:07,2374.09,-3.50,-500,"Pullback to 4h demand, confirmation candle"
+7001022,51234567,Jo Trader,2026.06.16 09:00,sell,0.50,xauusd,2383.27,2394.27,2361.27,2026.06.16 10:13,2394.27,-3.50,-550,NY open liquidity sweep then reclaim
+7001023,51234567,Jo Trader,2026.06.17 07:00,buy,1.00,xauusd,2416.75,2405.75,2438.75,2026.06.17 07:46,2405.75,-3.50,-1100,"Bored, small scalp"
+7001024,51234567,Jo Trader,2026.06.18 08:00,sell,1.00,xauusd,2402.67,2411.67,2384.67,2026.06.18 09:46,2411.67,-3.50,-900,"Bored, small scalp"
+7001025,51234567,Jo Trader,2026.06.18 10:08,sell,1.00,xauusd,2377.46,2389.46,2353.46,2026.06.18 11:07,2363.06,-3.50,1440,Need to make back the last loss
+7001026,51234567,Jo Trader,2026.06.18 11:28,buy,0.50,xauusd,2357.98,2344.98,2383.98,2026.06.18 12:42,2344.98,-3.50,-650,"London breakout retest, structure clean"
+7001027,51234567,Jo Trader,2026.06.19 08:00,buy,1.00,xauusd,2422.47,2409.47,2448.47,2026.06.19 08:30,2409.47,-3.50,-1300,"Missed the move, jumping in before it runs"
+7001028,51234567,Jo Trader,2026.06.19 08:50,sell,0.50,xauusd,2428.62,2436.62,2412.62,2026.06.19 10:33,2436.62,-3.50,-400,"Pullback to 4h demand, confirmation candle"
+7001029,51234567,Jo Trader,2026.06.19 10:49,sell,0.50,xauusd,2413.53,2423.53,2393.53,2026.06.19 11:30,2423.53,-3.50,-500,NY open liquidity sweep then reclaim
+7001030,51234567,Jo Trader,2026.06.22 07:00,buy,1.00,xauusd,2419.03,2407.03,2443.03,2026.06.22 07:40,2433.43,-3.50,1440,Need to make back the last loss
+7001031,51234567,Jo Trader,2026.06.23 09:00,buy,0.50,xauusd,2318.52,2310.52,2334.52,2026.06.23 09:43,2310.52,-3.50,-400,NY open liquidity sweep then reclaim
+7001032,51234567,Jo Trader,2026.06.23 09:59,sell,1.00,xauusd,2344.34,2353.34,2326.34,2026.06.23 11:27,2347.94,-3.50,-360,Need to make back the last loss
+7001033,51234567,Jo Trader,2026.06.24 07:00,sell,1.00,xauusd,2420.68,2430.68,2400.68,2026.06.24 08:30,2408.68,-3.50,1200,"Price is flying, getting in now"
+7001034,51234567,Jo Trader,2026.06.25 07:00,buy,0.50,xauusd,2410.37,2401.37,2428.37,2026.06.25 08:37,2428.37,-3.50,900,"Pullback to 4h demand, confirmation candle"
+7001035,51234567,Jo Trader,2026.06.25 09:29,sell,0.50,xauusd,2326.97,2335.97,2308.97,2026.06.25 10:04,2335.97,-3.50,-450,NY open liquidity sweep then reclaim
+7001036,51234567,Jo Trader,2026.06.25 10:28,buy,0.50,xauusd,2377.08,2365.08,2401.08,2026.06.25 10:53,2401.08,-3.50,1200,"Pullback to 4h demand, confirmation candle"
+7001037,51234567,Jo Trader,2026.06.26 09:00,buy,0.50,xauusd,2431.74,2420.74,2453.74,2026.06.26 10:43,2453.74,-3.50,1100,Asia range break with retest
+7001038,51234567,Jo Trader,2026.06.29 08:00,buy,0.50,xauusd,2330.97,2318.97,2354.97,2026.06.29 08:28,2338.17,-3.50,360,"London breakout retest, structure clean"
+7001039,51234567,Jo Trader,2026.06.29 10:38,sell,0.50,xauusd,2396.62,2408.62,2372.62,2026.06.29 12:06,2389.42,-3.50,360,"London breakout retest, structure clean"
+7001040,51234567,Jo Trader,2026.06.29 13:08,buy,0.50,xauusd,2376.72,2367.72,2394.72,2026.06.29 13:31,2394.72,-3.50,900,"London breakout retest, structure clean"
+7001041,51234567,Jo Trader,2026.06.30 08:00,buy,0.50,xauusd,2424.51,2414.51,2444.51,2026.06.30 09:38,2430.51,-3.50,300,NY open liquidity sweep then reclaim
+7001042,51234567,Jo Trader,2026.06.30 11:34,buy,0.50,xauusd,2377.83,2368.83,2395.83,2026.06.30 12:17,2383.23,-3.50,270,Asia range break with retest
+7001043,51234567,Jo Trader,2026.07.01 09:00,sell,0.50,xauusd,2423.77,2432.77,2405.77,2026.07.01 10:40,2405.77,-3.50,900,"Pullback to 4h demand, confirmation candle"
+7001044,51234567,Jo Trader,2026.07.01 11:51,buy,0.50,xauusd,2346.13,2333.13,2372.13,2026.07.01 12:22,2372.13,-3.50,1300,"Pullback to 4h demand, confirmation candle"
+7001045,51234567,Jo Trader,2026.07.01 14:42,sell,0.50,xauusd,2383.4,2394.4,2361.4,2026.07.01 16:14,2361.4,-3.50,1100,NY open liquidity sweep then reclaim
+7001046,51234567,Jo Trader,2026.07.02 09:00,sell,0.50,xauusd,2344,2355,2322,2026.07.02 09:33,2322,-3.50,1100,"London breakout retest, structure clean"
+7001047,51234567,Jo Trader,2026.07.02 11:46,buy,0.50,xauusd,2419.9,2409.9,2439.9,2026.07.02 13:09,2409.9,-3.50,-500,"London breakout retest, structure clean"
+7001048,51234567,Jo Trader,2026.07.02 13:14,sell,0.50,xauusd,2428.38,2438.38,2408.38,2026.07.02 15:03,2408.38,-3.50,1000,NY open liquidity sweep then reclaim
+7001049,51234567,Jo Trader,2026.07.03 07:00,buy,0.50,xauusd,2347.76,2338.76,2365.76,2026.07.03 08:30,2338.76,-3.50,-450,NY open liquidity sweep then reclaim
+7001050,51234567,Jo Trader,2026.07.03 08:48,buy,1.00,xauusd,2306.61,2293.61,2332.61,2026.07.03 09:49,2293.61,-3.50,-1300,"Should have held last one, going bigger"
+7001051,51234567,Jo Trader,2026.07.03 10:01,buy,0.50,xauusd,2363.2,2353.2,2383.2,2026.07.03 11:41,2383.2,-3.50,1000,NY open liquidity sweep then reclaim
+7001052,51234567,Jo Trader,2026.07.06 08:00,buy,0.50,xauusd,2309.85,2297.85,2333.85,2026.07.06 09:39,2333.85,-3.50,1200,"Pullback to 4h demand, confirmation candle"
+7001053,51234567,Jo Trader,2026.07.06 11:41,buy,0.50,xauusd,2336.38,2328.38,2352.38,2026.07.06 13:11,2352.38,-3.50,800,NY open liquidity sweep then reclaim
+7001054,51234567,Jo Trader,2026.07.07 07:00,sell,0.50,xauusd,2351.27,2359.27,2335.27,2026.07.07 07:25,2359.27,-3.50,-400,Asia range break with retest
+7001055,51234567,Jo Trader,2026.07.07 07:44,sell,0.50,xauusd,2337.71,2348.71,2315.71,2026.07.07 08:54,2315.71,-3.50,1100,"Pullback to 4h demand, confirmation candle"
+7001056,51234567,Jo Trader,2026.07.08 08:00,sell,0.50,xauusd,2387.69,2400.69,2361.69,2026.07.08 08:48,2400.69,-3.50,-650,"London breakout retest, structure clean"
+7001057,51234567,Jo Trader,2026.07.09 09:00,sell,0.50,xauusd,2350.37,2362.37,2326.37,2026.07.09 10:30,2362.37,-3.50,-600,Asia range break with retest
+7001058,51234567,Jo Trader,2026.07.09 10:41,sell,1.00,xauusd,2356.67,2366.67,2336.67,2026.07.09 12:18,2344.67,-3.50,1200,"Price is flying, getting in now"
+7001059,51234567,Jo Trader,2026.07.09 12:29,buy,0.50,xauusd,2352.44,2341.44,2374.44,2026.07.09 13:21,2341.44,-3.50,-550,"Pullback to 4h demand, confirmation candle"
+7001060,51234567,Jo Trader,2026.07.10 08:00,buy,1.00,xauusd,2333.55,2322.55,2355.55,2026.07.10 08:34,2329.15,-3.50,-440,"Bored, small scalp"
+7001061,51234567,Jo Trader,2026.07.10 08:56,buy,0.50,xauusd,2390.86,2380.86,2410.86,2026.07.10 10:04,2380.86,-3.50,-500,"London breakout retest, structure clean"
+7001062,51234567,Jo Trader,2026.07.13 09:00,buy,0.50,xauusd,2409.22,2401.22,2425.22,2026.07.13 10:43,2401.22,-3.50,-400,"London breakout retest, structure clean"
+7001063,51234567,Jo Trader,2026.07.14 07:00,buy,1.00,xauusd,2408.68,2398.68,2428.68,2026.07.14 07:33,2398.68,-3.50,-1000,"Should have held last one, going bigger"
+7001064,51234567,Jo Trader,2026.07.14 07:40,sell,1.00,xauusd,2436.8,2449.8,2410.8,2026.07.14 09:18,2449.8,-3.50,-1300,"Price is flying, getting in now"
+7001065,51234567,Jo Trader,2026.07.14 09:35,sell,0.50,xauusd,2362.8,2373.8,2340.8,2026.07.14 10:35,2340.8,-3.50,1100,NY open liquidity sweep then reclaim
+7001066,51234567,Jo Trader,2026.07.15 07:00,sell,0.50,xauusd,2314.02,2325.02,2292.02,2026.07.15 08:03,2325.02,-3.50,-550,Asia range break with retest
+7001067,51234567,Jo Trader,2026.07.15 08:17,buy,1.00,xauusd,2334.02,2321.02,2360.02,2026.07.15 09:06,2321.02,-3.50,-1300,"Should have held last one, going bigger"
+7001068,51234567,Jo Trader,2026.07.15 09:26,buy,0.50,xauusd,2373.5,2363.5,2393.5,2026.07.15 10:09,2363.5,-3.50,-500,"London breakout retest, structure clean"
+7001069,51234567,Jo Trader,2026.07.16 07:00,buy,0.50,xauusd,2380.24,2367.24,2406.24,2026.07.16 07:50,2406.24,-3.50,1300,"London breakout retest, structure clean"
+7001070,51234567,Jo Trader,2026.07.17 08:00,sell,0.50,xauusd,2373.24,2384.24,2351.24,2026.07.17 08:55,2351.24,-3.50,1100,"Pullback to 4h demand, confirmation candle"
+7001071,51234567,Jo Trader,2026.07.17 10:20,sell,0.50,xauusd,2366.78,2376.78,2346.78,2026.07.17 11:18,2376.78,-3.50,-500,Asia range break with retest
+7001072,51234567,Jo Trader,2026.07.20 08:00,buy,1.00,xauusd,2410.51,2401.51,2428.51,2026.07.20 08:37,2421.31,-3.50,1080,"Missed the move, jumping in before it runs"
+7001073,51234567,Jo Trader,2026.07.20 08:43,buy,0.50,xauusd,2349.5,2340.5,2367.5,2026.07.20 09:48,2340.5,-3.50,-450,NY open liquidity sweep then reclaim
+7001074,51234567,Jo Trader,2026.07.21 09:00,buy,0.50,xauusd,2426.37,2414.37,2450.37,2026.07.21 10:17,2414.37,-3.50,-600,NY open liquidity sweep then reclaim
+7001075,51234567,Jo Trader,2026.07.21 10:32,buy,1.00,xauusd,2357.86,2346.86,2379.86,2026.07.21 11:25,2371.06,-3.50,1320,"Bored, small scalp"
+7001076,51234567,Jo Trader,2026.07.22 08:00,buy,0.50,xauusd,2394.51,2383.51,2416.51,2026.07.22 08:39,2416.51,-3.50,1100,"Pullback to 4h demand, confirmation candle"
+7001077,51234567,Jo Trader,2026.07.22 11:13,sell,0.50,xauusd,2444.3,2456.3,2420.3,2026.07.22 12:24,2420.3,-3.50,1200,"London breakout retest, structure clean"
+7001078,51234567,Jo Trader,2026.07.22 13:44,sell,0.50,xauusd,2440.17,2451.17,2418.17,2026.07.22 15:26,2433.57,-3.50,330,"London breakout retest, structure clean"
+7001079,51234567,Jo Trader,2026.07.23 07:00,buy,0.50,xauusd,2387,2377,2407,2026.07.23 07:55,2377,-3.50,-500,"London breakout retest, structure clean"

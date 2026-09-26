@@ -7,6 +7,7 @@ import { errorHandler } from './lib/http.js';
 import { authRoutes } from './routes/auth.js';
 import { accountRoutes } from './routes/accounts.js';
 import { tradeRoutes } from './routes/trades.js';
+import { importRoutes } from './routes/import.js';
 
 export interface BuildOptions {
   logger?: boolean;
@@ -36,5 +37,6 @@ export async function buildApp(ctx: AppCtx, opts: BuildOptions = {}): Promise<Fa
   await authRoutes(app, ctx);
   await accountRoutes(app, ctx);
   await tradeRoutes(app, ctx);
+  await importRoutes(app, ctx);
   return app;
 }

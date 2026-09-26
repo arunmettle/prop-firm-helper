@@ -63,3 +63,37 @@ export function sessionOf(at: Date | string, cfg: SessionConfig = DEFAULT_SESSIO
 }
 
 export const WEEKDAYS = ['', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
+
+const offsetFmtCache = new Map<string, Intl.DateTimeFormat>();
+/** Offset (minutes) of `tz` from UTC at instant `utcMs`. */
+export function tzOffsetMinutes(tz: string, utcMs: number): number {
+  let f = offsetFmtCache.get(tz);
+  if (!f) {
+    f = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz,
+      hourCycle: 'h23',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
+    offsetFmtCache.set(tz, f);
+  }
+  const p = Object.fromEntries(f.formatToParts(new Date(utcMs)).map((x) => [x.type, x.value]));
+  const asUtc = Date.UTC(+p.year!, +p.month! - 1, +p.day!, +p.hour! % 24, +p.minute!, +p.second!);
+  return Math.round((asUtc - utcMs) / 60_000);
+}
+
+/** Interpret a wall-clock time in `tz` and return the UTC instant. */
+export function zonedWallTimeToUtc(
+  parts: { y: number; m: number; d: number; h?: number; mi?: number; s?: number },
+  tz: string,
+): Date {
+  const naive = Date.UTC(parts.y, parts.m - 1, parts.d, parts.h ?? 0, parts.mi ?? 0, parts.s ?? 0);
+  // Two passes handle DST transitions.
+  let utc = naive - tzOffsetMinutes(tz, naive) * 60_000;
+  utc = naive - tzOffsetMinutes(tz, utc) * 60_000;
+  return new Date(utc);
+}

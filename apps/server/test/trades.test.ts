@@ -14,7 +14,7 @@ beforeAll(async () => {
 });
 afterAll(async () => env.close());
 
-const post = (cookie: string, payload: unknown) => env.app.inject({ method: 'POST', url: '/api/trades', headers: { cookie }, payload });
+const post = (cookie: string, payload: Record<string, unknown>) => env.app.inject({ method: 'POST', url: '/api/trades', headers: { cookie }, payload });
 
 describe('trades', () => {
   it('computes risk, pnl and R on create', async () => {

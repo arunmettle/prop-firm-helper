@@ -7,3 +7,6 @@
 - **Instrument contract sizes and point values** vary by broker (esp. index CFDs). Wrong spec → wrong risk, R and position size. Defaults are shown with their formula and are overridable.
 - **Manual P&L vs price-based P&L.** If the user enters net P&L (after commissions/swap), R-multiples use it; price-based P&L ignores commissions and swap.
 - **Trades without a stop** have no risk amount and no R; they are excluded from R statistics (but count toward P&L and rules).
+- **CSV stop-loss is usually the FINAL stop, not the initial one.** If a trader moved the stop wider during the trade, broker exports show the wider stop → risk is overstated and R understated. We drop stops past entry but cannot detect a widened stop. Mitigation: users can edit imported trades; labelled `source=csv`.
+- **CSV timestamps:** the wrong "times are in" zone shifts trades across day boundaries → wrong daily-loss and trading-day counts. The preview shows the parsed times to check.
+- **CSV P&L column may be gross or net** of commission/swap depending on the broker. We import the Profit column as-is.
