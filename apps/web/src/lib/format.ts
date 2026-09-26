@@ -41,3 +41,10 @@ export const toLocalInput = (d: Date | string): string => {
 
 export const signClass = (v: number | null | undefined) =>
   v == null || v === 0 ? 'text-fg' : v > 0 ? 'text-go' : 'text-stop';
+
+export const fmtMinutes = (m: number | null | undefined): string => {
+  if (m == null) return '—';
+  if (m < 90) return `${Math.round(m)} min`;
+  if (m < 48 * 60) return `${Math.round(m / 60)} h`;
+  return `${Math.round(m / 1440)} days`;
+};

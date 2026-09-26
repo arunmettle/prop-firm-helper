@@ -39,3 +39,8 @@ One line each: decision — why.
 - "Size" in sizing stats = risk amount when ≥ 80% of trades have a stop, otherwise lots. Baseline = median.
 - Sessions by UTC hour: Asia 00–07, London 07–12, New York 12–21 (London/NY overlap counts as NY); configurable in code (`DEFAULT_SESSIONS`).
 - Chart colours: diverging blue (+) / orange (−) with a gray midpoint, validated for CVD and contrast on the dark surface; green/red stay reserved for P&L text and status.
+- Position size is rounded DOWN to a 0.01-lot step so the actual risk never exceeds the chosen %; the exact formula is shown on hover.
+- Pre-trade verdict = code (`decideVerdict`), model answers only contribute when confident (tilt ≥ high with confidence ≥ 0.6 → stop; elevated → caution; likely_impulse ≥ 0.65 → caution). Added two caution reasons beyond the spec — "within your cool-down after a loss" and "account already breached" (stop) — both from the trader's own rules. If Jev fails, the verdict uses rules only and says so.
+- "Size above baseline" = actual risk > 1.3× the median historical risk, or the chosen risk % > 1.3× the trader's own rule.
+- Setup × session history uses the current UTC session and exact setup-tag match; shown with n and "no history yet" when empty.
+- The PRECHECK_V1 state contains the planned trade, computed numbers, today's counters, the last 5 trades (outcome sign, R, exit type, label) and the trader's stated setups/rules — no identity, ids or account numbers.

@@ -6,7 +6,7 @@ import { RULE_TEXT, StatusBadge } from '../components/StatusBadge';
 import { Button, Card, EmptyState, ErrorBox, Kbd, Meter, PageHeader, Spinner, Stat } from '../components/ui';
 import { RecentTrades } from '../components/RecentTrades';
 import { api } from '../lib/api';
-import { fmtMoney, fmtSignedMoney, signClass } from '../lib/format';
+import { fmtMinutes, fmtMoney, fmtSignedMoney, signClass } from '../lib/format';
 import type { AccountDto, AccountStatusDto } from '../lib/types';
 
 export function useAccountStatus(account: AccountDto | null) {
@@ -137,7 +137,7 @@ export function DashboardPage() {
                 <Row label="P&L today" value={<span className={signClass(t.pnlToday)}>{fmtSignedMoney(t.pnlToday, cur)}</span>} />
                 <Row
                   label="Since last loss"
-                  value={t.minutesSinceLastLoss == null ? '—' : t.minutesSinceLastLoss < 120 ? `${t.minutesSinceLastLoss} min` : `${Math.round(t.minutesSinceLastLoss / 60)} h`}
+                  value={fmtMinutes(t.minutesSinceLastLoss)}
                   warn={t.minutesSinceLastLoss != null && t.minutesSinceLastLoss < tr.cooldownMinutes}
                 />
                 <Row

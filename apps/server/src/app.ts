@@ -11,6 +11,7 @@ import { importRoutes } from './routes/import.js';
 import { settingsRoutes } from './routes/settings.js';
 import { adminRoutes } from './routes/admin.js';
 import { profileRoutes } from './routes/profile.js';
+import { precheckRoutes } from './routes/prechecks.js';
 
 export interface BuildOptions {
   logger?: boolean;
@@ -44,5 +45,6 @@ export async function buildApp(ctx: AppCtx, opts: BuildOptions = {}): Promise<Fa
   await settingsRoutes(app, ctx);
   await adminRoutes(app, ctx);
   await profileRoutes(app, ctx);
+  await precheckRoutes(app, ctx);
   return app;
 }

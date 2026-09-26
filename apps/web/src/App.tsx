@@ -12,6 +12,7 @@ import { TradeFormPage } from './pages/TradeForm';
 import { ImportPage } from './pages/Import';
 import { AdminPage } from './pages/Admin';
 import { InsightsPage } from './pages/Insights';
+import { PrecheckPage } from './pages/Precheck';
 
 export function App() {
   const me = useMe();
@@ -30,6 +31,7 @@ export function App() {
         <Route path="/import" element={<ImportPage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/insights" element={<InsightsPage />} />
+        <Route path="/check" element={<PrecheckPage />} />
         <Route path="/accounts/:id" element={<AccountFormPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

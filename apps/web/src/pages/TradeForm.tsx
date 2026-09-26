@@ -402,7 +402,7 @@ export function TradeFormPage() {
                 <dd className="num font-medium">{fmtMoney(math?.riskAmount, cur)}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-fg-muted">Risk % of balance</dt>
+                <dt className="text-fg-muted">Risk % of starting balance</dt>
                 <dd className="num font-medium">{math?.riskAmount != null ? `${((math.riskAmount / account.startingBalance) * 100).toFixed(2)}%` : '—'}</dd>
               </div>
               <div className="flex justify-between">
