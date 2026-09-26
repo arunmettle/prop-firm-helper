@@ -44,3 +44,13 @@ One line each: decision — why.
 - "Size above baseline" = actual risk > 1.3× the median historical risk, or the chosen risk % > 1.3× the trader's own rule.
 - Setup × session history uses the current UTC session and exact setup-tag match; shown with n and "no history yet" when empty.
 - The PRECHECK_V1 state contains the planned trade, computed numbers, today's counters, the last 5 trades (outcome sign, R, exit type, label) and the trader's stated setups/rules — no identity, ids or account numbers.
+- Simulator is single-threaded: 10 scenarios × 10,000 runs take ~1.5–4.5 s, well under the 20 s target, so no worker_threads.
+- Simulator uses common random numbers: run i of every scenario uses the same seeded stream and draws the same random numbers in the same order, so scenario differences come from behaviour, not noise.
+- Simulated behaviour effects: size-up multiplies risk by the measured average size-up multiple (min 1.3×, default 1.5×); widened stop turns a loss into 1.5× the loss; early close halves a winner; extra trades (max 5/day) draw from the tilt pool and ignore the trader's own stop rules (that is what an unplanned trade is); planned trades respect max-trades/day and stop-after-N.
+- Risk per simulated trade = risk % × current balance (matches the pre-trade check).
+- Intraday worst case: a losing trade first touches its full stop (−1R, or −1.5R if widened) before closing; winners are assumed not to dip.
+- Once the target is reached but minimum trading days aren't, the simulated trader places a zero-P&L trade on each remaining trading day (the usual way traders complete min days).
+- No calendar limit in the rules → simulation horizon is 60 calendar days; unfinished runs are reported as "not finished", never as a pass.
+- Trading days/week: calendar day d is a trading day if d mod 7 < tradingDaysPerWeek.
+- Simulation config (pools, probabilities, rules) is snapshotted at enqueue time into `simulation_runs.config`, so a result is reproducible from its row. Rule sweeps: stop after 1/2/3 losses (excluding current) and risk 0.5%/1% (excluding current).
+- Credits: charge happens in the same transaction as the job insert, serialised per user with `pg_advisory_xact_lock`; the refund on final failure is idempotent through the ledger's unique (reason, ref_id).

@@ -116,6 +116,18 @@ export function buildConditionalProbs(
     }
     buckets.push({ losses: l, band: b, n: ns.get(k)!, counts: c, opportunities: o, raw, smoothed, lowData });
   }
+  const evidence: Record<BehaviourDim, string[]> = { sizeUp: [], extraTrade: [], skipValid: [], earlyClose: [], widenStop: [] };
+  const upMultiples: number[] = [];
+  for (const t of et) {
+    const bh = beh.get(t.id)!;
+    if (bh.sizeUp) {
+      evidence.sizeUp.push(t.id);
+      if (baseline) upMultiples.push(t.size / baseline);
+    }
+    if (bh.extraTrade) evidence.extraTrade.push(t.id);
+    if (bh.earlyClose) evidence.earlyClose.push(t.id);
+    if (bh.widenStop) evidence.widenStop.push(t.id);
+  }
   let jev = 0;
   let heuristic = 0;
   for (const v of beh.values()) {
@@ -130,5 +142,7 @@ export function buildConditionalProbs(
     global,
     globalN: et.length,
     classification: { jev, heuristic },
+    evidence,
+    sizeUpMultiple: upMultiples.length ? upMultiples.reduce((a, b) => a + b, 0) / upMultiples.length : null,
   };
 }

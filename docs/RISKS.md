@@ -12,3 +12,6 @@
 - **CSV P&L column may be gross or net** of commission/swap depending on the broker. We import the Profit column as-is.
 - **Plan/tilt classification drives the simulator's pools.** A mislabelled note moves a trade's R between the plan and tilt pools. Uncertain labels fall back to heuristics, and the split counts are shown.
 - **Skipped setups are only visible through unlinked pre-trade checks.** If the user doesn't use the check, P(skip) is 0 by construction, not by evidence.
+- **Bootstrap assumes trades are independent draws** (apart from the modelled state-dependent behaviour). Streaky markets or regime changes aren't captured; the CIs reflect simulation noise only, not uncertainty in the trader's true edge — with small pools, true uncertainty is much larger than the displayed interval. We show the pool size on every result.
+- **Behaviour effect sizes are modelling choices** (1.5× wider loss, half winner on early close). They drive the sensitivity ranking; see DECISIONS.md.
+- **Winners are assumed not to dip intraday.** Real winning trades can draw down first; with tight daily limits the simulator may be optimistic.

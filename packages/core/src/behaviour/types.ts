@@ -83,4 +83,8 @@ export interface ConditionalProbs {
   global: DimProbs;
   globalN: number;
   classification: { jev: number; heuristic: number };
+  /** Trade ids that showed each behaviour (for "show the evidence"). */
+  evidence: Record<BehaviourDim, string[]>;
+  /** Average size multiple of size-up trades vs baseline (used by the simulator). */
+  sizeUpMultiple: number | null;
 }
