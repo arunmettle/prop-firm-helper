@@ -5,6 +5,8 @@ import { Spinner } from './components/ui';
 import { LoginPage } from './pages/Login';
 import { VerifyPage } from './pages/Verify';
 import { DashboardPage } from './pages/Dashboard';
+import { AccountsPage } from './pages/Accounts';
+import { AccountFormPage } from './pages/AccountForm';
 
 export function App() {
   const me = useMe();
@@ -16,6 +18,8 @@ export function App() {
     <Layout me={me.data}>
       <Routes>
         <Route path="/" element={<DashboardPage />} />
+        <Route path="/accounts" element={<AccountsPage />} />
+        <Route path="/accounts/:id" element={<AccountFormPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>

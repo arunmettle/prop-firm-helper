@@ -1,4 +1,4 @@
-import type { AccountEvaluation, Rules, TraderRules } from '@cooldown/core';
+import type { AccountEvaluation, Rules, TodayStats, TraderRules } from '@cooldown/core';
 
 export interface AccountDto {
   id: string;
@@ -15,8 +15,7 @@ export interface AccountDto {
 
 export interface AccountStatusDto {
   evaluation: AccountEvaluation;
+  today: TodayStats;
   closedTrades: number;
   openTrades: number;
-  tradesToday: number;
-  lossesInARowToday: number;
 }

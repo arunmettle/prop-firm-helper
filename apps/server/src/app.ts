@@ -5,6 +5,7 @@ import { sql } from 'drizzle-orm';
 import type { AppCtx } from './ctx.js';
 import { errorHandler } from './lib/http.js';
 import { authRoutes } from './routes/auth.js';
+import { accountRoutes } from './routes/accounts.js';
 
 export interface BuildOptions {
   logger?: boolean;
@@ -32,5 +33,6 @@ export async function buildApp(ctx: AppCtx, opts: BuildOptions = {}): Promise<Fa
   });
 
   await authRoutes(app, ctx);
+  await accountRoutes(app, ctx);
   return app;
 }
