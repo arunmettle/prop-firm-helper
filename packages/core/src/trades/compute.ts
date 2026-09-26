@@ -52,7 +52,8 @@ export function computeTradeMath(
     }
   }
   if (pnl !== null) pnl = round2(pnl);
-  const rMultiple = pnl !== null && riskAmount !== null && riskAmount > 0 ? roundTo(pnl / riskAmount, 4) : null;
+  const rMultiple =
+    pnl !== null && riskAmount !== null && riskAmount > 0 ? roundTo(pnl / riskAmount, 4) : null;
   return { riskAmount, pnl, rMultiple, warnings, formula: pv.ok ? pv.value.formula : null };
 }
 

@@ -88,11 +88,20 @@ describe('trade input validation', () => {
     expect(tradeInputSchema.safeParse({ ...ok, direction: 'short', stopPrice: 2390 }).success).toBe(false);
   });
   it('rejects a closed trade without exit price or pnl', () => {
-    const r = tradeInputSchema.safeParse({ ...ok, closedAt: '2026-07-01T11:00:00Z', exitType: 'manual_close' });
+    const r = tradeInputSchema.safeParse({
+      ...ok,
+      closedAt: '2026-07-01T11:00:00Z',
+      exitType: 'manual_close',
+    });
     expect(r.success).toBe(false);
   });
   it('rejects close before open', () => {
-    const r = tradeInputSchema.safeParse({ ...ok, closedAt: '2026-07-01T09:00:00Z', exitPrice: 2401, exitType: 'manual_close' });
+    const r = tradeInputSchema.safeParse({
+      ...ok,
+      closedAt: '2026-07-01T09:00:00Z',
+      exitPrice: 2401,
+      exitType: 'manual_close',
+    });
     expect(r.success).toBe(false);
   });
   it('requires an override kind when flagged', () => {
@@ -102,7 +111,11 @@ describe('trade input validation', () => {
 
 describe('today stats', () => {
   const now = new Date('2026-07-02T15:00:00Z');
-  const t = (open: string, close: string | null, pnl: number | null) => ({ openedAt: open, closedAt: close, pnl });
+  const t = (open: string, close: string | null, pnl: number | null) => ({
+    openedAt: open,
+    closedAt: close,
+    pnl,
+  });
   it('counts trades, losses in a row and time since last loss in the firm tz', () => {
     const s = todayStats(
       [

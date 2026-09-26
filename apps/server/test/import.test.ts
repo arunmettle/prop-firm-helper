@@ -8,7 +8,14 @@ let accountId: string;
 beforeAll(async () => {
   env = await setupTestEnv();
   a = await signIn(env, 'imp@example.com');
-  accountId = (await env.app.inject({ method: 'POST', url: '/api/accounts', headers: { cookie: a }, payload: accountBody() })).json().id;
+  accountId = (
+    await env.app.inject({
+      method: 'POST',
+      url: '/api/accounts',
+      headers: { cookie: a },
+      payload: accountBody(),
+    })
+  ).json().id;
 });
 afterAll(async () => env.close());
 
@@ -32,9 +39,19 @@ const row = (i: number, o: Record<string, unknown> = {}) => ({
 describe('csv import', () => {
   it('imports rows and is idempotent', async () => {
     const payload = { accountId, rows: [row(0), row(1), row(2)], mapping: { openedAt: 'Open Time' } };
-    const first = await env.app.inject({ method: 'POST', url: '/api/import', headers: { cookie: a }, payload });
+    const first = await env.app.inject({
+      method: 'POST',
+      url: '/api/import',
+      headers: { cookie: a },
+      payload,
+    });
     expect(first.json()).toMatchObject({ inserted: 3, duplicates: 0 });
-    const second = await env.app.inject({ method: 'POST', url: '/api/import', headers: { cookie: a }, payload });
+    const second = await env.app.inject({
+      method: 'POST',
+      url: '/api/import',
+      headers: { cookie: a },
+      payload,
+    });
     expect(second.json()).toMatchObject({ inserted: 0, duplicates: 3 });
     const list = await env.app.inject({ url: `/api/trades?accountId=${accountId}`, headers: { cookie: a } });
     expect(list.json().total).toBe(3);
@@ -42,7 +59,12 @@ describe('csv import', () => {
   });
 
   it('dedupes within one file', async () => {
-    const r = await env.app.inject({ method: 'POST', url: '/api/import', headers: { cookie: a }, payload: { accountId, rows: [row(3), row(3)] } });
+    const r = await env.app.inject({
+      method: 'POST',
+      url: '/api/import',
+      headers: { cookie: a },
+      payload: { accountId, rows: [row(3), row(3)] },
+    });
     expect(r.json()).toMatchObject({ inserted: 1, duplicates: 1 });
   });
 

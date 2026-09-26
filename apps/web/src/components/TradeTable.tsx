@@ -7,7 +7,15 @@ import type { TradeDto } from '../lib/types';
 import { Badge } from './ui';
 import { LabelChips } from './LabelChips';
 
-export function TradeTable({ trades, currency, compact }: { trades: TradeDto[]; currency: string; compact?: boolean }) {
+export function TradeTable({
+  trades,
+  currency,
+  compact,
+}: {
+  trades: TradeDto[];
+  currency: string;
+  compact?: boolean;
+}) {
   const nav = useNavigate();
   return (
     <div className="overflow-x-auto scrollbar-thin">
@@ -26,18 +34,31 @@ export function TradeTable({ trades, currency, compact }: { trades: TradeDto[]; 
         </thead>
         <tbody className="divide-y divide-line">
           {trades.map((t) => (
-            <tr key={t.id} onClick={() => nav(`/trades/${t.id}`)} className="cursor-pointer hover:bg-surface-2/60">
+            <tr
+              key={t.id}
+              onClick={() => nav(`/trades/${t.id}`)}
+              className="cursor-pointer hover:bg-surface-2/60"
+            >
               <td className="num px-3 py-2.5 whitespace-nowrap text-fg-muted">{fmtDateTime(t.openedAt)}</td>
               <td className="px-3 py-2.5 whitespace-nowrap">
-                <span className={clsx('mr-1.5 font-medium', t.direction === 'long' ? 'text-go' : 'text-stop')}>
+                <span
+                  className={clsx('mr-1.5 font-medium', t.direction === 'long' ? 'text-go' : 'text-stop')}
+                >
                   {t.direction === 'long' ? 'L' : 'S'}
                 </span>
                 <span className="font-medium">{t.instrument}</span>
                 <span className="ml-2">
-                  {t.exitType === 'open' ? <Badge tone="info">Open</Badge> : <Badge>{EXIT_LABELS[t.exitType]}</Badge>}
+                  {t.exitType === 'open' ? (
+                    <Badge tone="info">Open</Badge>
+                  ) : (
+                    <Badge>{EXIT_LABELS[t.exitType]}</Badge>
+                  )}
                 </span>
                 {t.overrideFlag && (
-                  <span className="ml-1.5" title={t.overrideKind ? OVERRIDE_LABELS[t.overrideKind] : 'Override'}>
+                  <span
+                    className="ml-1.5"
+                    title={t.overrideKind ? OVERRIDE_LABELS[t.overrideKind] : 'Override'}
+                  >
                     <Badge tone="caution">
                       <Flag className="size-3" />
                       {t.overrideKind ? OVERRIDE_LABELS[t.overrideKind] : 'Override'}
@@ -51,17 +72,31 @@ export function TradeTable({ trades, currency, compact }: { trades: TradeDto[]; 
                   {t.entryPrice} → {t.exitPrice ?? '—'}
                 </td>
               )}
-              <td className={clsx('num px-3 py-2.5 text-right font-medium', (t.rMultiple ?? 0) > 0 ? 'text-go' : (t.rMultiple ?? 0) < 0 ? 'text-stop' : '')}>
+              <td
+                className={clsx(
+                  'num px-3 py-2.5 text-right font-medium',
+                  (t.rMultiple ?? 0) > 0 ? 'text-go' : (t.rMultiple ?? 0) < 0 ? 'text-stop' : '',
+                )}
+              >
                 {fmtR(t.rMultiple)}
               </td>
-              <td className={clsx('num px-3 py-2.5 text-right whitespace-nowrap', (t.pnl ?? 0) > 0 ? 'text-go' : (t.pnl ?? 0) < 0 ? 'text-stop' : '')}>
+              <td
+                className={clsx(
+                  'num px-3 py-2.5 text-right whitespace-nowrap',
+                  (t.pnl ?? 0) > 0 ? 'text-go' : (t.pnl ?? 0) < 0 ? 'text-stop' : '',
+                )}
+              >
                 {fmtMoney(t.pnl, currency)}
               </td>
               <td className="px-3 py-2.5 text-fg-muted">{t.setupTag ?? '—'}</td>
               {!compact && (
                 <td className="max-w-[320px] px-3 py-2.5">
                   <div className="truncate text-fg-muted" title={t.preNote ?? undefined}>
-                    {t.preNote ?? <span className="text-fg-subtle italic">{t.noteLabels ? 'note removed (privacy setting)' : '—'}</span>}
+                    {t.preNote ?? (
+                      <span className="text-fg-subtle italic">
+                        {t.noteLabels ? 'note removed (privacy setting)' : '—'}
+                      </span>
+                    )}
                   </div>
                   <LabelChips trade={t} />
                 </td>

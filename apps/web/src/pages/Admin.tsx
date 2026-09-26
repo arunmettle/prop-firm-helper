@@ -14,7 +14,10 @@ export function AdminPage() {
   const q = useQuery({ queryKey: ['admin-usage'], queryFn: () => api.get<Usage>('/api/admin/usage') });
   return (
     <>
-      <PageHeader title="Admin" description="Model usage and queue health. Counters only — no trade content is visible here." />
+      <PageHeader
+        title="Admin"
+        description="Model usage and queue health. Counters only — no trade content is visible here."
+      />
       {q.isLoading && <Spinner />}
       {q.error && <ErrorBox error={q.error} />}
       {q.data && (
@@ -22,7 +25,11 @@ export function AdminPage() {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             <Stat label="Jev provider" value={q.data.provider} />
             <Stat label="Jobs queued" value={q.data.jobs.queued} />
-            <Stat label="Jobs failed" value={q.data.jobs.failed} tone={q.data.jobs.failed ? 'caution' : undefined} />
+            <Stat
+              label="Jobs failed"
+              value={q.data.jobs.failed}
+              tone={q.data.jobs.failed ? 'caution' : undefined}
+            />
             <Stat label="Simulations" value={q.data.simulations} />
             <Stat label="Credits sold" value={q.data.creditsSold} />
           </div>
@@ -49,7 +56,9 @@ export function AdminPage() {
                 ))}
                 {!q.data.users.length && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-6 text-center text-fg-muted">No usage yet.</td>
+                    <td colSpan={5} className="px-4 py-6 text-center text-fg-muted">
+                      No usage yet.
+                    </td>
                   </tr>
                 )}
               </tbody>

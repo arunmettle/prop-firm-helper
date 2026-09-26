@@ -71,7 +71,11 @@ export function Layout({ me, children }: { me: Me; children: ReactNode }) {
             >
               <n.icon className="size-4 shrink-0" />
               <span className="flex-1">{n.label}</span>
-              {n.key && <span className="opacity-0 transition-opacity group-hover:opacity-100"><Kbd>{n.key.toUpperCase()}</Kbd></span>}
+              {n.key && (
+                <span className="opacity-0 transition-opacity group-hover:opacity-100">
+                  <Kbd>{n.key.toUpperCase()}</Kbd>
+                </span>
+              )}
             </NavLink>
           ))}
           {me.isAdmin && (
@@ -95,7 +99,10 @@ export function Layout({ me, children }: { me: Me; children: ReactNode }) {
           >
             <Coins className="size-4" />
             <span className="flex-1">Credits</span>
-            <span className="num rounded-md bg-accent-soft px-1.5 text-xs font-semibold text-accent" data-testid="credit-balance">
+            <span
+              className="num rounded-md bg-accent-soft px-1.5 text-xs font-semibold text-accent"
+              data-testid="credit-balance"
+            >
               {me.credits}
             </span>
           </NavLink>
@@ -112,7 +119,11 @@ export function Layout({ me, children }: { me: Me; children: ReactNode }) {
             <span className="min-w-0 flex-1 truncate text-xs text-fg-subtle" title={me.email}>
               {me.email}
             </span>
-            <button onClick={logout} title="Sign out" className="rounded-md p-1.5 text-fg-subtle hover:bg-surface-2 hover:text-fg">
+            <button
+              onClick={logout}
+              title="Sign out"
+              className="rounded-md p-1.5 text-fg-subtle hover:bg-surface-2 hover:text-fg"
+            >
               <LogOut className="size-3.5" />
             </button>
           </div>
@@ -128,7 +139,13 @@ export function Layout({ me, children }: { me: Me; children: ReactNode }) {
           </div>
           <nav className="flex gap-1 overflow-x-auto">
             {NAV.map((n) => (
-              <NavLink key={n.to} to={n.to} end={n.end} className="rounded-md p-2 text-fg-muted hover:bg-surface-2" title={n.label}>
+              <NavLink
+                key={n.to}
+                to={n.to}
+                end={n.end}
+                className="rounded-md p-2 text-fg-muted hover:bg-surface-2"
+                title={n.label}
+              >
                 <n.icon className="size-4" />
               </NavLink>
             ))}

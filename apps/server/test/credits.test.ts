@@ -17,7 +17,15 @@ const completed = (id: string, userId: string, packId = 'pack10', paid = 'paid')
   id: `evt_${id}`,
   object: 'event',
   type: 'checkout.session.completed',
-  data: { object: { id, object: 'checkout.session', payment_status: paid, client_reference_id: userId, metadata: { userId, packId } } },
+  data: {
+    object: {
+      id,
+      object: 'checkout.session',
+      payment_status: paid,
+      client_reference_id: userId,
+      metadata: { userId, packId },
+    },
+  },
 });
 
 describe('credits + payments enabled', () => {
@@ -25,15 +33,26 @@ describe('credits + payments enabled', () => {
   let cookie: string;
   let userId: string;
   beforeAll(async () => {
-    env = await setupTestEnv({ PAYMENTS_ENABLED: 'true', STRIPE_SECRET_KEY: 'sk_test_x', STRIPE_WEBHOOK_SECRET: SECRET, STRIPE_CREDIT_PACKS: PACKS });
+    env = await setupTestEnv({
+      PAYMENTS_ENABLED: 'true',
+      STRIPE_SECRET_KEY: 'sk_test_x',
+      STRIPE_WEBHOOK_SECRET: SECRET,
+      STRIPE_CREDIT_PACKS: PACKS,
+    });
     cookie = await signIn(env, 'buyer@example.com');
     userId = (await env.ctx.db.select().from(users).where(eq(users.email, 'buyer@example.com')))[0]!.id;
   });
   afterAll(async () => env.close());
 
-  const credits = async () => (await env.app.inject({ url: '/api/credits', headers: { cookie } })).json().balance;
+  const credits = async () =>
+    (await env.app.inject({ url: '/api/credits', headers: { cookie } })).json().balance;
   const post = (p: { body: string; header: string }) =>
-    env.app.inject({ method: 'POST', url: '/api/stripe/webhook', headers: { 'stripe-signature': p.header, 'content-type': 'application/json' }, payload: p.body });
+    env.app.inject({
+      method: 'POST',
+      url: '/api/stripe/webhook',
+      headers: { 'stripe-signature': p.header, 'content-type': 'application/json' },
+      payload: p.body,
+    });
 
   it('lists packs and the ledger', async () => {
     const r = (await env.app.inject({ url: '/api/credits', headers: { cookie } })).json();
@@ -85,7 +104,25 @@ describe('payments disabled (default)', () => {
 
   it('hides packs and refuses checkout and webhooks', async () => {
     expect((await env.app.inject({ url: '/api/credits', headers: { cookie } })).json().packs).toEqual([]);
-    expect((await env.app.inject({ method: 'POST', url: '/api/credits/checkout', headers: { cookie }, payload: { packId: 'pack10' } })).statusCode).toBe(404);
-    expect((await env.app.inject({ method: 'POST', url: '/api/stripe/webhook', headers: { 'content-type': 'application/json' }, payload: '{}' })).statusCode).toBe(404);
+    expect(
+      (
+        await env.app.inject({
+          method: 'POST',
+          url: '/api/credits/checkout',
+          headers: { cookie },
+          payload: { packId: 'pack10' },
+        })
+      ).statusCode,
+    ).toBe(404);
+    expect(
+      (
+        await env.app.inject({
+          method: 'POST',
+          url: '/api/stripe/webhook',
+          headers: { 'content-type': 'application/json' },
+          payload: '{}',
+        })
+      ).statusCode,
+    ).toBe(404);
   });
 });

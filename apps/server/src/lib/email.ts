@@ -39,7 +39,13 @@ export class ResendEmailSender implements EmailSender {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${this.apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: this.from, to: [msg.to], subject: msg.subject, text: msg.text, html: msg.html }),
+      body: JSON.stringify({
+        from: this.from,
+        to: [msg.to],
+        subject: msg.subject,
+        text: msg.text,
+        html: msg.html,
+      }),
     });
     if (!res.ok) throw new Error(`Resend failed with HTTP ${res.status}`);
   }

@@ -41,7 +41,11 @@ const labels = (driver: string, tilt: number, uncertain = false): NoteLabels => 
 
 describe('group stats', () => {
   it('computes win rate, avg R, net R and P&L', () => {
-    const g = groupStat('x', [T('2026-07-01T08:00:00Z', 10, 2), T('2026-07-01T09:00:00Z', 10, -1), T('2026-07-01T10:00:00Z', 10, 0.5)]);
+    const g = groupStat('x', [
+      T('2026-07-01T08:00:00Z', 10, 2),
+      T('2026-07-01T09:00:00Z', 10, -1),
+      T('2026-07-01T10:00:00Z', 10, 0.5),
+    ]);
     expect(g.n).toBe(3);
     expect(g.winRate).toBeCloseTo(2 / 3);
     expect(g.avgR).toBeCloseTo(0.5);
@@ -49,7 +53,10 @@ describe('group stats', () => {
     expect(g.netPnl).toBe(1500);
   });
   it('trades without R count toward n and P&L but not avg R', () => {
-    const g = groupStat('x', [T('2026-07-01T08:00:00Z', 10, 1), { ...T('2026-07-01T09:00:00Z', 10, 1), rMultiple: null }]);
+    const g = groupStat('x', [
+      T('2026-07-01T08:00:00Z', 10, 1),
+      { ...T('2026-07-01T09:00:00Z', 10, 1), rMultiple: null },
+    ]);
     expect(g.n).toBe(2);
     expect(g.nR).toBe(1);
   });
@@ -61,7 +68,9 @@ describe('behaviour profile', () => {
   for (let d = 1; d <= 12; d++) {
     const day = `2026-07-${String(d).padStart(2, '0')}`;
     history.push(T(`${day}T08:00:00Z`, 20, -1, { noteLabels: labels('plan', 0.1) }));
-    history.push(T(`${day}T08:30:00Z`, 20, -1, { riskAmount: 2000, sizeLots: 2, noteLabels: labels('revenge', 0.9) }));
+    history.push(
+      T(`${day}T08:30:00Z`, 20, -1, { riskAmount: 2000, sizeLots: 2, noteLabels: labels('revenge', 0.9) }),
+    );
     history.push(T(`${day}T13:00:00Z`, 60, 2, { setupTag: 'B', noteLabels: labels('plan', 0.1) }));
   }
   const p = buildProfile(history, ctx);

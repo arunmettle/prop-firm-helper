@@ -16,7 +16,13 @@ const rules = (o: Record<string, unknown> = {}) =>
     ...o,
   });
 
-const emptyEvidence: Record<BehaviourDim, string[]> = { sizeUp: [], extraTrade: [], skipValid: [], earlyClose: [], widenStop: [] };
+const emptyEvidence: Record<BehaviourDim, string[]> = {
+  sizeUp: [],
+  extraTrade: [],
+  skipValid: [],
+  earlyClose: [],
+  widenStop: [],
+};
 const cfg = (o: Partial<SimConfig> = {}, m: Partial<SimConfig['measured']> = {}): SimConfig => ({
   version: 'sim-v1',
   rules: rules(),
@@ -25,7 +31,16 @@ const cfg = (o: Partial<SimConfig> = {}, m: Partial<SimConfig['measured']> = {})
   runs: 200,
   seed: 42,
   maxDays: 60,
-  measured: { probs: {}, planPool: [1], tiltPool: [-1], tradesPerDay: [1], sizeUpMultiple: 2, historyTrades: 100, evidence: emptyEvidence, ...m },
+  measured: {
+    probs: {},
+    planPool: [1],
+    tiltPool: [-1],
+    tradesPerDay: [1],
+    sizeUpMultiple: 2,
+    historyTrades: 100,
+    evidence: emptyEvidence,
+    ...m,
+  },
   ...o,
 });
 const params = (c: SimConfig, o: Record<string, unknown> = {}) => ({
@@ -72,20 +87,29 @@ describe('analytic toy histories', () => {
   });
   it('always −1R at 5% risk breaches max loss on day 3', () => {
     // 100k → 95k → 90.25k → 85.74k: below the 90k floor on the 3rd loss; daily loss (≤ 5k) never exceeded.
-    const c = cfg({ trader: { riskPct: 5, maxTradesPerDay: null, stopAfterLosses: null, tradingDaysPerWeek: 7 } }, { planPool: [-1] });
+    const c = cfg(
+      { trader: { riskPct: 5, maxTradesPerDay: null, stopAfterLosses: null, tradingDaysPerWeek: 7 } },
+      { planPool: [-1] },
+    );
     const r = simulateScenario(c, params(c));
     expect(r.breach.p).toBe(1);
     expect(r.breachByRule.max_loss).toBe(c.runs);
     expect(r.breachByDay[2]).toBe(c.runs);
   });
   it('two −1R trades a day at 3% risk breach the daily limit on day 1', () => {
-    const c = cfg({ trader: { riskPct: 3, maxTradesPerDay: null, stopAfterLosses: null, tradingDaysPerWeek: 7 } }, { planPool: [-1], tradesPerDay: [2] });
+    const c = cfg(
+      { trader: { riskPct: 3, maxTradesPerDay: null, stopAfterLosses: null, tradingDaysPerWeek: 7 } },
+      { planPool: [-1], tradesPerDay: [2] },
+    );
     const r = simulateScenario(c, params(c));
     expect(r.breachByRule.max_daily_loss).toBe(c.runs);
     expect(r.breachByDay[0]).toBe(c.runs);
   });
   it('stop-after-1-loss rule prevents that daily breach', () => {
-    const c = cfg({ trader: { riskPct: 3, maxTradesPerDay: null, stopAfterLosses: 1, tradingDaysPerWeek: 7 } }, { planPool: [-1], tradesPerDay: [2] });
+    const c = cfg(
+      { trader: { riskPct: 3, maxTradesPerDay: null, stopAfterLosses: 1, tradingDaysPerWeek: 7 } },
+      { planPool: [-1], tradesPerDay: [2] },
+    );
     const r = simulateScenario(c, params(c));
     expect(r.breachByRule.max_daily_loss).toBe(0);
     expect(r.breachByRule.max_loss).toBe(c.runs);
@@ -101,12 +125,17 @@ describe('analytic toy histories', () => {
     expect(r.timeout.p).toBe(1);
   });
   it('non-trading days are skipped (5 days/week → pass on calendar day 12)', () => {
-    const c = cfg({ trader: { riskPct: 1, maxTradesPerDay: null, stopAfterLosses: null, tradingDaysPerWeek: 5 } });
+    const c = cfg({
+      trader: { riskPct: 1, maxTradesPerDay: null, stopAfterLosses: null, tradingDaysPerWeek: 5 },
+    });
     expect(simulateScenario(c, params(c)).medianPassDay).toBe(12);
   });
   it('intraday worst case: a small final loss still checks a full −1R dip', () => {
     // −0.2R closes but the path touches −1R; at 6% risk the dip breaches the 5% daily limit immediately.
-    const c = cfg({ trader: { riskPct: 6, maxTradesPerDay: null, stopAfterLosses: null, tradingDaysPerWeek: 7 } }, { planPool: [-0.2] });
+    const c = cfg(
+      { trader: { riskPct: 6, maxTradesPerDay: null, stopAfterLosses: null, tradingDaysPerWeek: 7 } },
+      { planPool: [-0.2] },
+    );
     const r = simulateScenario(c, params(c));
     expect(r.breachByRule.max_daily_loss).toBe(c.runs);
     expect(r.breachByDay[0]).toBe(c.runs);
@@ -128,9 +157,25 @@ describe('trailing drawdown in the simulator', () => {
 
 describe('behaviour + sensitivity', () => {
   const tiltProbs: Record<string, DimProbs> = {};
-  for (const l of ['0', '1', '2', '3+']) for (const b of ['up', 'flat', 'down_lt50', 'down_ge50'])
-    tiltProbs[`${l}|${b}`] = { sizeUp: l === '0' ? 0 : 0.6, extraTrade: l === '0' ? 0 : 0.4, skipValid: 0, earlyClose: 0.1, widenStop: 0 };
-  const c = cfg({ runs: 1500 }, { probs: tiltProbs, planPool: [2, -1, -1, 2, 0.5], tiltPool: [-1, -1, 1], tradesPerDay: [1, 2], evidence: { ...emptyEvidence, sizeUp: ['t1', 't2'] } });
+  for (const l of ['0', '1', '2', '3+'])
+    for (const b of ['up', 'flat', 'down_lt50', 'down_ge50'])
+      tiltProbs[`${l}|${b}`] = {
+        sizeUp: l === '0' ? 0 : 0.6,
+        extraTrade: l === '0' ? 0 : 0.4,
+        skipValid: 0,
+        earlyClose: 0.1,
+        widenStop: 0,
+      };
+  const c = cfg(
+    { runs: 1500 },
+    {
+      probs: tiltProbs,
+      planPool: [2, -1, -1, 2, 0.5],
+      tiltPool: [-1, -1, 1],
+      tradesPerDay: [1, 2],
+      evidence: { ...emptyEvidence, sizeUp: ['t1', 't2'] },
+    },
+  );
 
   it('is deterministic: same seed + config → identical result', () => {
     const a = runSimulation(c, () => 0);
@@ -171,11 +216,27 @@ describe('behaviour + sensitivity', () => {
 describe('performance', () => {
   it('10,000 runs × all scenarios in under 20 seconds', () => {
     const probs: Record<string, DimProbs> = {};
-    for (const l of ['0', '1', '2', '3+']) for (const b of ['up', 'flat', 'down_lt50', 'down_ge50'])
-      probs[`${l}|${b}`] = { sizeUp: 0.2, extraTrade: 0.2, skipValid: 0.05, earlyClose: 0.1, widenStop: 0.05 };
+    for (const l of ['0', '1', '2', '3+'])
+      for (const b of ['up', 'flat', 'down_lt50', 'down_ge50'])
+        probs[`${l}|${b}`] = {
+          sizeUp: 0.2,
+          extraTrade: 0.2,
+          skipValid: 0.05,
+          earlyClose: 0.1,
+          widenStop: 0.05,
+        };
     const c = cfg(
-      { runs: 10_000, rules: rules({ minTradingDays: 4 }), trader: { riskPct: 0.5, maxTradesPerDay: 3, stopAfterLosses: 2, tradingDaysPerWeek: 5 } },
-      { probs, planPool: [2, -1, -1, 1.5, -1, 0.5, 2, -1], tiltPool: [-1, -1, 1, -1.2], tradesPerDay: [1, 2, 2, 3] },
+      {
+        runs: 10_000,
+        rules: rules({ minTradingDays: 4 }),
+        trader: { riskPct: 0.5, maxTradesPerDay: 3, stopAfterLosses: 2, tradingDaysPerWeek: 5 },
+      },
+      {
+        probs,
+        planPool: [2, -1, -1, 1.5, -1, 0.5, 2, -1],
+        tiltPool: [-1, -1, 1, -1.2],
+        tradesPerDay: [1, 2, 2, 3],
+      },
     );
     const t0 = performance.now();
     const r = runSimulation(c);

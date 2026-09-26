@@ -29,7 +29,13 @@ const median = (xs: number[]) => {
   return s.length % 2 ? s[m]! : (s[m - 1]! + s[m]!) / 2;
 };
 
-export async function runPrecheck(ctx: AppCtx, user: User, account: Account, input: PrecheckInput, now = new Date()) {
+export async function runPrecheck(
+  ctx: AppCtx,
+  user: User,
+  account: Account,
+  input: PrecheckInput,
+  now = new Date(),
+) {
   const rules = ruleSchema.parse(account.rules);
   const tr = parseTraderRules(account.traderRules);
   const settings = parseUserSettings(user.settings);
@@ -64,7 +70,9 @@ export async function runPrecheck(ctx: AppCtx, user: User, account: Account, inp
     overrideKind: t.overrideKind,
     noteLabels: null,
   });
-  const matching = closed.filter((t) => (t.setupTag ?? null) === (input.setupTag || null) && sessionOf(t.openedAt) === session);
+  const matching = closed.filter(
+    (t) => (t.setupTag ?? null) === (input.setupTag || null) && sessionOf(t.openedAt) === session,
+  );
   const computed = buildComputed({
     input,
     evaluation,
@@ -89,7 +97,13 @@ export async function runPrecheck(ctx: AppCtx, user: User, account: Account, inp
     };
   });
   const state = {
-    planned_trade: { instrument: input.instrument, direction: input.direction, entry: input.entry, stop: input.stop, target: input.target },
+    planned_trade: {
+      instrument: input.instrument,
+      direction: input.direction,
+      entry: input.entry,
+      stop: input.stop,
+      target: input.target,
+    },
     setup_tag: input.setupTag,
     pre_note: input.preNote,
     computed: {
@@ -107,7 +121,11 @@ export async function runPrecheck(ctx: AppCtx, user: User, account: Account, inp
     },
     recent_trades: recent,
     stated_setups: tr.setups,
-    rules: { max_trades_per_day: tr.maxTradesPerDay, stop_after_losses: tr.stopAfterLosses, cooldown_minutes: tr.cooldownMinutes },
+    rules: {
+      max_trades_per_day: tr.maxTradesPerDay,
+      stop_after_losses: tr.stopAfterLosses,
+      cooldown_minutes: tr.cooldownMinutes,
+    },
   };
 
   let jev: PrecheckJevView;
@@ -122,7 +140,10 @@ export async function runPrecheck(ctx: AppCtx, user: User, account: Account, inp
         confidence: a.tilt_risk.confidence,
         uncertain: isUncertain(a.tilt_risk),
       },
-      matches_stated_setup: { p: a.matches_stated_setup.noul, uncertain: isUncertain(a.matches_stated_setup) },
+      matches_stated_setup: {
+        p: a.matches_stated_setup.noul,
+        uncertain: isUncertain(a.matches_stated_setup),
+      },
       likely_impulse: { p: a.likely_impulse.noul, uncertain: isUncertain(a.likely_impulse) },
     };
   } catch {
@@ -169,4 +190,3 @@ export async function recentPrechecks(ctx: AppCtx, userId: string, accountId: st
     .limit(20);
   return rows.map(precheckDto);
 }
-

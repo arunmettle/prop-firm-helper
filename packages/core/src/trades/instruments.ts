@@ -17,9 +17,24 @@ export const INSTRUMENTS: Record<string, InstrumentSpec> = {
   GBPUSD: { symbol: 'GBPUSD', contractSize: 100_000, quoteCurrency: 'USD' },
   AUDUSD: { symbol: 'AUDUSD', contractSize: 100_000, quoteCurrency: 'USD' },
   USDJPY: { symbol: 'USDJPY', contractSize: 100_000, quoteCurrency: 'JPY' },
-  US30: { symbol: 'US30', contractSize: 1, quoteCurrency: 'USD', note: 'Varies by broker — check your contract spec' },
-  NAS100: { symbol: 'NAS100', contractSize: 1, quoteCurrency: 'USD', note: 'Varies by broker — check your contract spec' },
-  US500: { symbol: 'US500', contractSize: 1, quoteCurrency: 'USD', note: 'Varies by broker — check your contract spec' },
+  US30: {
+    symbol: 'US30',
+    contractSize: 1,
+    quoteCurrency: 'USD',
+    note: 'Varies by broker — check your contract spec',
+  },
+  NAS100: {
+    symbol: 'NAS100',
+    contractSize: 1,
+    quoteCurrency: 'USD',
+    note: 'Varies by broker — check your contract spec',
+  },
+  US500: {
+    symbol: 'US500',
+    contractSize: 1,
+    quoteCurrency: 'USD',
+    note: 'Varies by broker — check your contract spec',
+  },
 };
 
 export interface PointValue {
@@ -33,7 +48,10 @@ export interface PointValue {
 export type PointValueResult = { ok: true; value: PointValue } | { ok: false; reason: string };
 
 export function normalizeSymbol(s: string): string {
-  return s.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  return s
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '');
 }
 
 export function pointValue(
@@ -56,7 +74,10 @@ export function pointValue(
   const spec = INSTRUMENTS[sym];
   const contractSize = o?.contractSize ?? spec?.contractSize;
   if (!contractSize) {
-    return { ok: false, reason: `No contract spec for ${sym}. Set its point value in Settings → Instruments.` };
+    return {
+      ok: false,
+      reason: `No contract spec for ${sym}. Set its point value in Settings → Instruments.`,
+    };
   }
   const quote = spec?.quoteCurrency ?? accountCurrency;
   if (quote.toUpperCase() !== accountCurrency.toUpperCase()) {

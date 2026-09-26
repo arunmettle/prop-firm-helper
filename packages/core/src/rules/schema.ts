@@ -33,7 +33,4 @@ export const ruleSchema = z.object({
 export type Rules = z.infer<typeof ruleSchema>;
 export type RulesInput = z.input<typeof ruleSchema>;
 
-export type RuleName =
-  | 'max_daily_loss'
-  | 'max_loss'
-  | 'max_calendar_days';
+export type RuleName = 'max_daily_loss' | 'max_loss' | 'max_calendar_days';

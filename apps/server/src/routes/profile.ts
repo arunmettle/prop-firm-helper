@@ -21,7 +21,9 @@ export async function profileRoutes(app: FastifyInstance, ctx: AppCtx) {
     const [pending] = await ctx.db
       .select({ n: sql<number>`count(*)::int` })
       .from(trades)
-      .where(and(eq(trades.userId, user.id), eq(trades.accountId, accountId), eq(trades.labelsStatus, 'pending')));
+      .where(
+        and(eq(trades.userId, user.id), eq(trades.accountId, accountId), eq(trades.labelsStatus, 'pending')),
+      );
     return { profile, labelsPending: pending?.n ?? 0, disclaimer: DISCLAIMER };
   });
 

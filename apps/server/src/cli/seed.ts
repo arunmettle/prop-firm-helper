@@ -28,7 +28,11 @@ await runMigrations(db);
 const ctx: AppCtx = { cfg, db, email: new ConsoleEmailSender(), jev: createJevFromConfig(cfg) };
 
 let [user] = await db.select().from(users).where(eq(users.email, EMAIL)).limit(1);
-if (!user) [user] = await db.insert(users).values({ email: EMAIL, settings: parseUserSettings({}) }).returning();
+if (!user)
+  [user] = await db
+    .insert(users)
+    .values({ email: EMAIL, settings: parseUserSettings({}) })
+    .returning();
 let [account] = await db.select().from(accounts).where(eq(accounts.userId, user!.id)).limit(1);
 if (!account) {
   [account] = await db
@@ -40,15 +44,28 @@ if (!account) {
       startingBalance: 100_000,
       currency: 'USD',
       rules: RULE_PRESETS[0]!.rules,
-      traderRules: { riskPct: 1, maxTradesPerDay: 3, stopAfterLosses: 2, tradingDaysPerWeek: 5, cooldownMinutes: 30, setups: ['London breakout retest', 'NY open liquidity sweep', 'Pullback to 4h demand'] },
+      traderRules: {
+        riskPct: 1,
+        maxTradesPerDay: 3,
+        stopAfterLosses: 2,
+        tradingDaysPerWeek: 5,
+        cooldownMinutes: 30,
+        setups: ['London breakout retest', 'NY open liquidity sweep', 'Pullback to 4h demand'],
+      },
       startDate: new Date('2026-06-01T00:00:00Z'),
     })
     .returning();
 }
 
-const csvPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../samples/mt4-history-sample.csv');
+const csvPath = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '../../../../samples/mt4-history-sample.csv',
+);
 const [header, ...lines] = readFileSync(csvPath, 'utf8').trim().split('\n');
-const split = (l: string) => (l.match(/("([^"]|"")*"|[^,]*)(,|$)/g) ?? []).map((c) => c.replace(/,$/, '').replace(/^"|"$/g, '')).slice(0, -1);
+const split = (l: string) =>
+  (l.match(/("([^"]|"")*"|[^,]*)(,|$)/g) ?? [])
+    .map((c) => c.replace(/,$/, '').replace(/^"|"$/g, ''))
+    .slice(0, -1);
 const headers = split(header!);
 const rows = lines.map((l) => Object.fromEntries(split(l).map((v, i) => [headers[i], v])));
 const mapping = guessMapping(headers.filter((h) => !['Account', 'Name'].includes(h)));
@@ -60,8 +77,19 @@ for (const r of rows) {
   const { row } = buildTradeRow(input, account!, user!, 'csv');
   values.push({ ...row, userId: user!.id, accountId: account!.id, importHash: importHash(input) });
 }
-const inserted = await db.insert(trades).values(values).onConflictDoNothing({ target: [trades.userId, trades.importHash] }).returning({ id: trades.id });
-await db.transaction((tx) => onTradesChanged(ctx, tx, user!.id, inserted.map((t) => t.id)));
+const inserted = await db
+  .insert(trades)
+  .values(values)
+  .onConflictDoNothing({ target: [trades.userId, trades.importHash] })
+  .returning({ id: trades.id });
+await db.transaction((tx) =>
+  onTradesChanged(
+    ctx,
+    tx,
+    user!.id,
+    inserted.map((t) => t.id),
+  ),
+);
 await drain(ctx, handlers);
 if (inserted.length) await grantCredits(db, user!.id, 5, `seed:${user!.id}`);
 

@@ -75,12 +75,15 @@ export function ImportPage() {
 
   const upload = useMutation({
     mutationFn: () =>
-      api.post<{ inserted: number; duplicates: number; errors: { row: number; message: string }[] }>('/api/import', {
-        accountId: account!.id,
-        // Only the whitelisted, mapped trade fields leave the browser.
-        rows: valid.map((v) => (v.ok ? v.trade : null)).filter(Boolean),
-        mapping: Object.fromEntries(Object.entries(mapping).filter(([, v]) => v)),
-      }),
+      api.post<{ inserted: number; duplicates: number; errors: { row: number; message: string }[] }>(
+        '/api/import',
+        {
+          accountId: account!.id,
+          // Only the whitelisted, mapped trade fields leave the browser.
+          rows: valid.map((v) => (v.ok ? v.trade : null)).filter(Boolean),
+          mapping: Object.fromEntries(Object.entries(mapping).filter(([, v]) => v)),
+        },
+      ),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['trades'] });
       qc.invalidateQueries({ queryKey: ['status'] });
@@ -105,11 +108,22 @@ export function ImportPage() {
                 {r.inserted} trade{r.inserted === 1 ? '' : 's'} imported into {account.label}
               </p>
               <p className="mt-1 text-fg-muted">
-                {r.duplicates} already existed and were skipped{r.errors.length ? ` · ${r.errors.length} rows rejected` : ''}. Notes are being classified in the background.
+                {r.duplicates} already existed and were skipped
+                {r.errors.length ? ` · ${r.errors.length} rows rejected` : ''}. Notes are being classified in
+                the background.
               </p>
               <div className="mt-4 flex gap-2">
-                <Link to="/trades"><Button variant="primary">View trades</Button></Link>
-                <Button onClick={() => { upload.reset(); setParsed(null); }}>Import another file</Button>
+                <Link to="/trades">
+                  <Button variant="primary">View trades</Button>
+                </Link>
+                <Button
+                  onClick={() => {
+                    upload.reset();
+                    setParsed(null);
+                  }}
+                >
+                  Import another file
+                </Button>
               </div>
             </div>
           </div>
@@ -126,7 +140,10 @@ export function ImportPage() {
       />
       {!parsed ? (
         <div
-          onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDrag(true);
+          }}
           onDragLeave={() => setDrag(false)}
           onDrop={(e: DragEvent) => {
             e.preventDefault();
@@ -143,9 +160,23 @@ export function ImportPage() {
             <FileUp className="size-5" />
           </div>
           <p className="text-[15px] font-semibold">Drop a CSV export here</p>
-          <p className="mt-1 text-sm text-fg-muted">MT4/MT5 history, cTrader, or a spreadsheet — one position per row.</p>
-          <input ref={fileRef} type="file" accept=".csv,text/csv" className="hidden" data-testid="csv-input" onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])} />
-          <Button className="mt-5" variant="primary" icon={<Upload className="size-4" />} onClick={() => fileRef.current?.click()}>
+          <p className="mt-1 text-sm text-fg-muted">
+            MT4/MT5 history, cTrader, or a spreadsheet — one position per row.
+          </p>
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".csv,text/csv"
+            className="hidden"
+            data-testid="csv-input"
+            onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])}
+          />
+          <Button
+            className="mt-5"
+            variant="primary"
+            icon={<Upload className="size-4" />}
+            onClick={() => fileRef.current?.click()}
+          >
             Choose file
           </Button>
           {parseError && <p className="mt-4 text-sm text-stop">{parseError}</p>}
@@ -158,12 +189,17 @@ export function ImportPage() {
           <Card
             title={parsed.fileName}
             subtitle={`${parsed.rows.length} rows · ${parsed.headers.length} columns`}
-            actions={<Button size="sm" variant="ghost" onClick={() => setParsed(null)}>Choose another file</Button>}
+            actions={
+              <Button size="sm" variant="ghost" onClick={() => setParsed(null)}>
+                Choose another file
+              </Button>
+            }
           >
             {parsed.dropped.length > 0 ? (
               <div className="rounded-lg border border-caution/30 bg-caution-soft/50 p-3">
                 <div className="flex items-center gap-2 text-sm font-medium text-caution">
-                  <EyeOff className="size-4" /> {parsed.dropped.length} column{parsed.dropped.length === 1 ? '' : 's'} will not be uploaded
+                  <EyeOff className="size-4" /> {parsed.dropped.length} column
+                  {parsed.dropped.length === 1 ? '' : 's'} will not be uploaded
                 </div>
                 <ul className="mt-2 space-y-1 text-sm" data-testid="dropped-columns">
                   {parsed.dropped.map((d) => (
@@ -183,23 +219,41 @@ export function ImportPage() {
           <Card title="Map columns" subtitle="Saved for next time. Only mapped fields are sent.">
             <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
               {CSV_FIELDS.map((f) => (
-                <Field key={f} label={<>{CSV_FIELD_LABELS[f]}{CSV_REQUIRED.includes(f) && <span className="text-stop"> *</span>}</>}>
-                  <Select value={mapping[f] ?? ''} onChange={(e) => setMapping((m) => ({ ...m, [f]: e.target.value || undefined }))}>
+                <Field
+                  key={f}
+                  label={
+                    <>
+                      {CSV_FIELD_LABELS[f]}
+                      {CSV_REQUIRED.includes(f) && <span className="text-stop"> *</span>}
+                    </>
+                  }
+                >
+                  <Select
+                    value={mapping[f] ?? ''}
+                    onChange={(e) => setMapping((m) => ({ ...m, [f]: e.target.value || undefined }))}
+                  >
                     <option value="">— not in file —</option>
                     {allowed.map((h) => (
-                      <option key={h} value={h}>{h}</option>
+                      <option key={h} value={h}>
+                        {h}
+                      </option>
                     ))}
                   </Select>
                 </Field>
               ))}
               <Field label="Times in the file are in" hint="Broker server time is often UTC+2/+3.">
                 <Select value={tz} onChange={(e) => setTz(e.target.value)}>
-                  {TZ.map((z) => <option key={z}>{z}</option>)}
+                  {TZ.map((z) => (
+                    <option key={z}>{z}</option>
+                  ))}
                 </Select>
               </Field>
               {!mapping.instrument && (
                 <Field label="Instrument for all rows">
-                  <Input value={defaultInstrument} onChange={(e) => setDefaultInstrument(e.target.value.toUpperCase())} />
+                  <Input
+                    value={defaultInstrument}
+                    onChange={(e) => setDefaultInstrument(e.target.value.toUpperCase())}
+                  />
                 </Field>
               )}
             </div>
@@ -207,9 +261,19 @@ export function ImportPage() {
 
           <Card
             title="Preview"
-            subtitle={missingRequired.length ? `Map required fields: ${missingRequired.map((f) => CSV_FIELD_LABELS[f]).join(', ')}` : `${valid.length} ready · ${invalid.length} with problems`}
+            subtitle={
+              missingRequired.length
+                ? `Map required fields: ${missingRequired.map((f) => CSV_FIELD_LABELS[f]).join(', ')}`
+                : `${valid.length} ready · ${invalid.length} with problems`
+            }
             actions={
-              <Button variant="primary" disabled={!valid.length || missingRequired.length > 0} loading={upload.isPending} onClick={() => upload.mutate()} data-testid="import-submit">
+              <Button
+                variant="primary"
+                disabled={!valid.length || missingRequired.length > 0}
+                loading={upload.isPending}
+                onClick={() => upload.mutate()}
+                data-testid="import-submit"
+              >
                 Import {valid.length} trade{valid.length === 1 ? '' : 's'}
               </Button>
             }
@@ -237,21 +301,33 @@ export function ImportPage() {
                       {m.ok ? (
                         <>
                           <td className="num px-3 py-2 whitespace-nowrap">{fmtDateTime(m.trade.openedAt)}</td>
-                          <td className="px-3 py-2">{m.trade.direction === 'long' ? 'Long' : 'Short'} {m.trade.instrument}</td>
+                          <td className="px-3 py-2">
+                            {m.trade.direction === 'long' ? 'Long' : 'Short'} {m.trade.instrument}
+                          </td>
                           <td className="num px-3 py-2 text-right">{m.trade.sizeLots}</td>
-                          <td className="num px-3 py-2 text-right">{m.trade.entryPrice} / {m.trade.stopPrice ?? '—'}</td>
+                          <td className="num px-3 py-2 text-right">
+                            {m.trade.entryPrice} / {m.trade.stopPrice ?? '—'}
+                          </td>
                           <td className="num px-3 py-2 text-right">{m.trade.exitPrice ?? '—'}</td>
-                          <td className="num px-3 py-2 text-right">{fmtMoney(m.trade.pnl ?? null, account.currency)}</td>
-                          <td className="px-3 py-2"><Badge tone="go">Ready</Badge></td>
+                          <td className="num px-3 py-2 text-right">
+                            {fmtMoney(m.trade.pnl ?? null, account.currency)}
+                          </td>
+                          <td className="px-3 py-2">
+                            <Badge tone="go">Ready</Badge>
+                          </td>
                         </>
                       ) : (
-                        <td colSpan={7} className="px-3 py-2 text-caution">{m.error}</td>
+                        <td colSpan={7} className="px-3 py-2 text-caution">
+                          {m.error}
+                        </td>
                       )}
                     </tr>
                   ))}
                 </tbody>
               </table>
-              {mapped.length > 12 && <p className="px-3 py-2 text-xs text-fg-subtle">…and {mapped.length - 12} more rows</p>}
+              {mapped.length > 12 && (
+                <p className="px-3 py-2 text-xs text-fg-subtle">…and {mapped.length - 12} more rows</p>
+              )}
             </div>
           </Card>
         </div>

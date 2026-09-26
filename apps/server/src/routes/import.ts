@@ -38,7 +38,12 @@ const importBody = z.strictObject({
 });
 
 /** Idempotency key: same instrument + open time + entry + size = same trade. */
-export const importHash = (t: { instrument: string; openedAt: string; entryPrice: number; sizeLots: number }) =>
+export const importHash = (t: {
+  instrument: string;
+  openedAt: string;
+  entryPrice: number;
+  sizeLots: number;
+}) =>
   sha256(`${t.instrument.toUpperCase()}|${new Date(t.openedAt).toISOString()}|${t.entryPrice}|${t.sizeLots}`);
 
 export async function importRoutes(app: FastifyInstance, ctx: AppCtx) {
@@ -80,7 +85,10 @@ export async function importRoutes(app: FastifyInstance, ctx: AppCtx) {
       }
       if (body.mapping) {
         const settings = parseUserSettings(user.settings);
-        await tx.update(users).set({ settings: { ...settings, csvMapping: body.mapping } }).where(eq(users.id, user.id));
+        await tx
+          .update(users)
+          .set({ settings: { ...settings, csvMapping: body.mapping } })
+          .where(eq(users.id, user.id));
       }
       await onTradesChanged(ctx, tx, user.id, ids);
       return ids;

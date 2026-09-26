@@ -22,7 +22,8 @@ export const NOTE_CLASSIFIER_V1 = defineQuestions({
   },
   followed_own_plan: {
     type: 'noul',
-    instructions: 'Did the trader follow their own plan on this trade, judging from `pre_note`, `override_kind` and `override_note`?',
+    instructions:
+      'Did the trader follow their own plan on this trade, judging from `pre_note`, `override_kind` and `override_note`?',
     criteria: {
       true: 'The note describes a planned setup and any change was part of the plan',
       false: 'The note or override shows the trader departed from their plan',
@@ -30,7 +31,8 @@ export const NOTE_CLASSIFIER_V1 = defineQuestions({
   },
   impulsiveness: {
     type: 'score',
-    instructions: 'How impulsive was the decision to take or manage this trade, based on `pre_note` and the timing context?',
+    instructions:
+      'How impulsive was the decision to take or manage this trade, based on `pre_note` and the timing context?',
     criteria: ['Deliberate', 'Somewhat rushed', 'Impulsive'],
   },
 });
@@ -68,12 +70,17 @@ export const PRECHECK_V1 = defineQuestions({
   },
   matches_stated_setup: {
     type: 'noul',
-    instructions: 'Does `pre_note` describe one of the trader’s own setups listed in `stated_setups` or `setup_tag`?',
-    criteria: { true: 'The note describes one of the stated setups', false: 'The note does not describe a stated setup' },
+    instructions:
+      'Does `pre_note` describe one of the trader’s own setups listed in `stated_setups` or `setup_tag`?',
+    criteria: {
+      true: 'The note describes one of the stated setups',
+      false: 'The note does not describe a stated setup',
+    },
   },
   likely_impulse: {
     type: 'noul',
-    instructions: 'Does `pre_note`, together with `today`, suggest this entry is an impulse rather than a planned decision?',
+    instructions:
+      'Does `pre_note`, together with `today`, suggest this entry is an impulse rather than a planned decision?',
     criteria: { true: 'Likely an impulse entry', false: 'Likely a planned entry' },
   },
 });

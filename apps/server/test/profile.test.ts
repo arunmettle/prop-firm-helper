@@ -10,13 +10,23 @@ beforeAll(async () => {
   env = await setupTestEnv();
   a = await signIn(env, 'prof@example.com');
   b = await signIn(env, 'other@example.com');
-  accountId = (await env.app.inject({ method: 'POST', url: '/api/accounts', headers: { cookie: a }, payload: accountBody() })).json().id;
+  accountId = (
+    await env.app.inject({
+      method: 'POST',
+      url: '/api/accounts',
+      headers: { cookie: a },
+      payload: accountBody(),
+    })
+  ).json().id;
   for (let i = 0; i < 12; i++) {
     await env.app.inject({
       method: 'POST',
       url: '/api/trades',
       headers: { cookie: a },
-      payload: tradeBody(accountId, i % 3 === 0 ? { exitPrice: 2390, exitType: 'stop', preNote: 'Need to make back the last loss' } : {}),
+      payload: tradeBody(
+        accountId,
+        i % 3 === 0 ? { exitPrice: 2390, exitType: 'stop', preNote: 'Need to make back the last loss' } : {},
+      ),
     });
   }
   await runJobs(env);
@@ -36,12 +46,27 @@ describe('behaviour profile API', () => {
   });
 
   it('evidence endpoint only returns the caller’s trades', async () => {
-    const list = (await env.app.inject({ url: `/api/trades?accountId=${accountId}`, headers: { cookie: a } })).json();
+    const list = (
+      await env.app.inject({ url: `/api/trades?accountId=${accountId}`, headers: { cookie: a } })
+    ).json();
     const ids = list.trades.map((t: { id: string }) => t.id);
-    const mine = await env.app.inject({ method: 'POST', url: '/api/trades/by-ids', headers: { cookie: a }, payload: { ids } });
+    const mine = await env.app.inject({
+      method: 'POST',
+      url: '/api/trades/by-ids',
+      headers: { cookie: a },
+      payload: { ids },
+    });
     expect(mine.json()).toHaveLength(12);
-    const theirs = await env.app.inject({ method: 'POST', url: '/api/trades/by-ids', headers: { cookie: b }, payload: { ids } });
+    const theirs = await env.app.inject({
+      method: 'POST',
+      url: '/api/trades/by-ids',
+      headers: { cookie: b },
+      payload: { ids },
+    });
     expect(theirs.json()).toHaveLength(0);
-    expect((await env.app.inject({ url: `/api/profile?accountId=${accountId}`, headers: { cookie: b } })).statusCode).toBe(404);
+    expect(
+      (await env.app.inject({ url: `/api/profile?accountId=${accountId}`, headers: { cookie: b } }))
+        .statusCode,
+    ).toBe(404);
   });
 });

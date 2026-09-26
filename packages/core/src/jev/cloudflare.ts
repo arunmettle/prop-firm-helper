@@ -16,7 +16,8 @@ export class CloudflareJevTransport implements JevTransport {
     private fetchImpl: typeof fetch = fetch,
     private timeoutMs = 8000,
   ) {
-    if (!accountId || !apiToken) throw new Error('Cloudflare Jev adapter needs CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN');
+    if (!accountId || !apiToken)
+      throw new Error('Cloudflare Jev adapter needs CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN');
   }
 
   async call(state: unknown, questions: Questions) {
@@ -41,7 +42,9 @@ export class CloudflareJevTransport implements JevTransport {
     if (body.success === false || !body.result) throw new JevError('Cloudflare returned success=false', true);
     const result = body.result;
     const answers = (result.answers as unknown) ?? result;
-    const usage = result.usage as { input_tokens?: number; output_tokens?: number; prompt_tokens?: number; completion_tokens?: number } | undefined;
+    const usage = result.usage as
+      | { input_tokens?: number; output_tokens?: number; prompt_tokens?: number; completion_tokens?: number }
+      | undefined;
     return {
       answers,
       usage: {

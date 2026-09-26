@@ -12,7 +12,10 @@ export async function balanceOf(db: Tx, userId: string): Promise<number> {
 }
 
 export async function grantSignupCredits(db: Tx, userId: string, n: number): Promise<void> {
-  if (n > 0) await db.insert(creditsLedger).values({ userId, delta: n, reason: 'admin_grant', refId: `signup:${userId}` });
+  if (n > 0)
+    await db
+      .insert(creditsLedger)
+      .values({ userId, delta: n, reason: 'admin_grant', refId: `signup:${userId}` });
 }
 
 /** Lock the user's ledger rows for the duration of the transaction (serialises concurrent spends). */

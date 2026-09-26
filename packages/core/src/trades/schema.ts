@@ -2,7 +2,13 @@ import { z } from 'zod';
 
 export const directionSchema = z.enum(['long', 'short']);
 export const exitTypeSchema = z.enum(['target', 'stop', 'manual_close', 'breakeven', 'open']);
-export const overrideKindSchema = z.enum(['moved_stop', 'moved_target', 'closed_early', 'added_size', 'removed_stop']);
+export const overrideKindSchema = z.enum([
+  'moved_stop',
+  'moved_target',
+  'closed_early',
+  'added_size',
+  'removed_stop',
+]);
 export type Direction = z.infer<typeof directionSchema>;
 export type ExitType = z.infer<typeof exitTypeSchema>;
 export type OverrideKind = z.infer<typeof overrideKindSchema>;
@@ -51,9 +57,19 @@ export const tradeInputSchema = z
     const add = (path: string, message: string) => ctx.addIssue({ code: 'custom', path: [path], message });
     const dir = t.direction === 'long' ? 1 : -1;
     if (t.stopPrice !== null && (t.stopPrice - t.entryPrice) * dir >= 0)
-      add('stopPrice', t.direction === 'long' ? 'Stop must be below entry for a long' : 'Stop must be above entry for a short');
+      add(
+        'stopPrice',
+        t.direction === 'long'
+          ? 'Stop must be below entry for a long'
+          : 'Stop must be above entry for a short',
+      );
     if (t.targetPrice !== null && (t.targetPrice - t.entryPrice) * dir <= 0)
-      add('targetPrice', t.direction === 'long' ? 'Target must be above entry for a long' : 'Target must be below entry for a short');
+      add(
+        'targetPrice',
+        t.direction === 'long'
+          ? 'Target must be above entry for a long'
+          : 'Target must be below entry for a short',
+      );
     if (t.closedAt) {
       if (new Date(t.closedAt) < new Date(t.openedAt)) add('closedAt', 'Close time is before open time');
       if (t.exitPrice === null && t.pnl === null) add('exitPrice', 'Enter an exit price or the P&L');

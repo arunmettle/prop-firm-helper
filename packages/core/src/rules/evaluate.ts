@@ -97,8 +97,10 @@ export function evaluateAccount(
     ...snap,
     currentDay: currentKey,
     openTradeRisk: risk,
-    openTradeExceedsDaily: risk !== null && Math.round(risk * 100) > Math.round(snap.dailyLossRemaining * 100),
-    openTradeExceedsMaxLoss: risk !== null && Math.round(risk * 100) > Math.round(snap.distanceToMaxLoss * 100),
+    openTradeExceedsDaily:
+      risk !== null && Math.round(risk * 100) > Math.round(snap.dailyLossRemaining * 100),
+    openTradeExceedsMaxLoss:
+      risk !== null && Math.round(risk * 100) > Math.round(snap.distanceToMaxLoss * 100),
     dailyLossRemainingAfterOpen: round2(after),
     calendarDaysElapsed: firstKey && currentKey ? dayDiff(firstKey, currentKey as string) + 1 : 0,
   };

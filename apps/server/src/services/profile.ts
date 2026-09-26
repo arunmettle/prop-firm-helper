@@ -1,5 +1,11 @@
 import { and, asc, eq, isNotNull } from 'drizzle-orm';
-import { buildProfile, parseTraderRules, ruleSchema, type BehaviourProfile, type BTrade } from '@cooldown/core';
+import {
+  buildProfile,
+  parseTraderRules,
+  ruleSchema,
+  type BehaviourProfile,
+  type BTrade,
+} from '@cooldown/core';
 import type { NoteLabels } from '@cooldown/core/jev';
 import type { Tx } from '../db/client.js';
 import { behaviourProfiles, prechecks, trades, type Account } from '../db/schema.js';
@@ -11,10 +17,21 @@ export async function computeProfile(db: Tx, account: Account): Promise<Behaviou
   const rows = await db
     .select()
     .from(trades)
-    .where(and(eq(trades.userId, account.userId), eq(trades.accountId, account.id), isNotNull(trades.closedAt), isNotNull(trades.pnl)))
+    .where(
+      and(
+        eq(trades.userId, account.userId),
+        eq(trades.accountId, account.id),
+        isNotNull(trades.closedAt),
+        isNotNull(trades.pnl),
+      ),
+    )
     .orderBy(asc(trades.openedAt));
   const pcs = await db
-    .select({ createdAt: prechecks.createdAt, verdict: prechecks.verdict, linkedTradeId: prechecks.linkedTradeId })
+    .select({
+      createdAt: prechecks.createdAt,
+      verdict: prechecks.verdict,
+      linkedTradeId: prechecks.linkedTradeId,
+    })
     .from(prechecks)
     .where(and(eq(prechecks.userId, account.userId), eq(prechecks.accountId, account.id)));
   const bt: BTrade[] = rows.map((t) => ({
@@ -44,7 +61,9 @@ export async function computeProfile(db: Tx, account: Account): Promise<Behaviou
     pcs.map((p) => ({ createdAt: p.createdAt, verdict: p.verdict, linked: !!p.linkedTradeId })),
   );
   await db.transaction(async (tx) => {
-    await tx.delete(behaviourProfiles).where(and(eq(behaviourProfiles.userId, account.userId), eq(behaviourProfiles.accountId, account.id)));
+    await tx
+      .delete(behaviourProfiles)
+      .where(and(eq(behaviourProfiles.userId, account.userId), eq(behaviourProfiles.accountId, account.id)));
     await tx.insert(behaviourProfiles).values({
       userId: account.userId,
       accountId: account.id,

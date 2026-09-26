@@ -63,8 +63,17 @@ export async function tradeRoutes(app: FastifyInstance, ctx: AppCtx) {
     const rows = await ctx.db
       .selectDistinct({ tag: trades.setupTag })
       .from(trades)
-      .where(and(eq(trades.userId, user.id), isNotNull(trades.setupTag), accountId ? eq(trades.accountId, accountId) : undefined));
-    return rows.map((r) => r.tag).filter(Boolean).sort();
+      .where(
+        and(
+          eq(trades.userId, user.id),
+          isNotNull(trades.setupTag),
+          accountId ? eq(trades.accountId, accountId) : undefined,
+        ),
+      );
+    return rows
+      .map((r) => r.tag)
+      .filter(Boolean)
+      .sort();
   });
 
   app.post('/api/trades', pre, async (req) => {
@@ -73,15 +82,24 @@ export async function tradeRoutes(app: FastifyInstance, ctx: AppCtx) {
     const account = await ownedAccount(ctx.db, user.id, body.accountId);
     const { row, warnings } = buildTradeRow(body, account, user);
     const trade = await ctx.db.transaction(async (tx) => {
-      const [t] = await tx.insert(trades).values({ ...row, userId: user.id, accountId: account.id }).returning();
+      const [t] = await tx
+        .insert(trades)
+        .values({ ...row, userId: user.id, accountId: account.id })
+        .returning();
       if (body.precheckId && isUuid(body.precheckId)) {
         await tx
           .update(prechecks)
           .set({ linkedTradeId: t!.id })
-          .where(and(eq(prechecks.id, body.precheckId), eq(prechecks.userId, user.id), eq(prechecks.accountId, account.id)));
+          .where(
+            and(
+              eq(prechecks.id, body.precheckId),
+              eq(prechecks.userId, user.id),
+              eq(prechecks.accountId, account.id),
+            ),
+          );
       }
       await onTradesChanged(ctx, tx, user.id, [t!.id]);
-      return (await ownedTrade(tx, user.id, t!.id));
+      return await ownedTrade(tx, user.id, t!.id);
     });
     return { trade: tradeDto(trade), warnings };
   });
@@ -92,14 +110,26 @@ export async function tradeRoutes(app: FastifyInstance, ctx: AppCtx) {
     { ...pre, config: { rateLimit: { max: 3, timeWindow: '1 minute' } } },
     async (req) => {
       const user = currentUser(req);
-      const body = parse(z.object({ accountId: z.uuid(), scope: z.enum(['failed_or_outdated', 'all']).default('failed_or_outdated') }), req.body);
+      const body = parse(
+        z.object({
+          accountId: z.uuid(),
+          scope: z.enum(['failed_or_outdated', 'all']).default('failed_or_outdated'),
+        }),
+        req.body,
+      );
       await ownedAccount(ctx.db, user.id, body.accountId);
       const rows = await ctx.db
         .select({ id: trades.id, status: trades.labelsStatus, version: trades.labelsVersion })
         .from(trades)
         .where(and(eq(trades.userId, user.id), eq(trades.accountId, body.accountId)));
       const ids = rows
-        .filter((r) => body.scope === 'all' || r.status === 'failed' || r.status === 'pending' || (r.status === 'done' && r.version !== NOTE_LABELS_VERSION))
+        .filter(
+          (r) =>
+            body.scope === 'all' ||
+            r.status === 'failed' ||
+            r.status === 'pending' ||
+            (r.status === 'done' && r.version !== NOTE_LABELS_VERSION),
+        )
         .map((r) => r.id);
       await ctx.db.transaction((tx) => onTradesChanged(ctx, tx, user.id, ids));
       return { queued: ids.length };

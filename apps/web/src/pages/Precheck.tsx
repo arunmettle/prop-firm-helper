@@ -1,7 +1,16 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowDownRight, ArrowUpRight, CircleCheck, CircleAlert, OctagonX, Info, ListPlus, Sigma } from 'lucide-react';
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  CircleCheck,
+  CircleAlert,
+  OctagonX,
+  Info,
+  ListPlus,
+  Sigma,
+} from 'lucide-react';
 import type { PrecheckComputed, PrecheckJevView, Reason } from '@cooldown/core';
 import { api, ApiError, errorText } from '../lib/api';
 import { useActiveAccount } from '../components/AccountSwitcher';
@@ -13,7 +22,16 @@ import { cn } from '../lib/cn';
 interface PrecheckDto {
   id: string;
   createdAt: string;
-  input: { instrument: string; direction: 'long' | 'short'; entry: number; stop: number; target: number | null; setupTag: string | null; riskPct: number; preNote: string };
+  input: {
+    instrument: string;
+    direction: 'long' | 'short';
+    entry: number;
+    stop: number;
+    target: number | null;
+    setupTag: string | null;
+    riskPct: number;
+    preNote: string;
+  };
   computed: PrecheckComputed;
   reasons: Reason[];
   jev: PrecheckJevView;
@@ -22,9 +40,24 @@ interface PrecheckDto {
 }
 
 const VERDICT = {
-  go: { label: 'Clear by your rules', sub: 'Nothing in your rules or recent state flags this.', icon: CircleCheck, cls: 'border-go/30 bg-go-soft text-go' },
-  caution: { label: 'Proceed with care', sub: 'Something in your recent state is worth a second look.', icon: CircleAlert, cls: 'border-caution/30 bg-caution-soft text-caution' },
-  stop: { label: 'Your rules say stop', sub: 'At least one of your own hard rules is hit.', icon: OctagonX, cls: 'border-stop/30 bg-stop-soft text-stop' },
+  go: {
+    label: 'Clear by your rules',
+    sub: 'Nothing in your rules or recent state flags this.',
+    icon: CircleCheck,
+    cls: 'border-go/30 bg-go-soft text-go',
+  },
+  caution: {
+    label: 'Proceed with care',
+    sub: 'Something in your recent state is worth a second look.',
+    icon: CircleAlert,
+    cls: 'border-caution/30 bg-caution-soft text-caution',
+  },
+  stop: {
+    label: 'Your rules say stop',
+    sub: 'At least one of your own hard rules is hit.',
+    icon: OctagonX,
+    cls: 'border-stop/30 bg-stop-soft text-stop',
+  },
 } as const;
 
 export function PrecheckPage() {
@@ -33,7 +66,16 @@ export function PrecheckPage() {
   const nav = useNavigate();
   const qc = useQueryClient();
   const entryRef = useRef<HTMLInputElement>(null);
-  const [f, setF] = useState({ instrument: 'XAUUSD', direction: 'long' as 'long' | 'short', entry: '', stop: '', target: '', setupTag: '', riskPct: '', preNote: '' });
+  const [f, setF] = useState({
+    instrument: 'XAUUSD',
+    direction: 'long' as 'long' | 'short',
+    entry: '',
+    stop: '',
+    target: '',
+    setupTag: '',
+    riskPct: '',
+    preNote: '',
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const tags = useQuery({
     queryKey: ['setup-tags', account?.id],
@@ -63,7 +105,8 @@ export function PrecheckPage() {
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['prechecks'] }),
     onError: (e) => {
-      if (e instanceof ApiError && e.details) setErrors(Object.fromEntries(e.details.map((d) => [d.path, d.message])));
+      if (e instanceof ApiError && e.details)
+        setErrors(Object.fromEntries(e.details.map((d) => [d.path, d.message])));
     },
   });
 
@@ -101,33 +144,70 @@ export function PrecheckPage() {
                         onClick={() => setF({ ...f, direction: d })}
                         className={cn(
                           'flex h-8 items-center justify-center gap-1 rounded-md text-sm font-medium capitalize',
-                          f.direction === d ? (d === 'long' ? 'bg-go-soft text-go' : 'bg-stop-soft text-stop') : 'text-fg-muted hover:text-fg',
+                          f.direction === d
+                            ? d === 'long'
+                              ? 'bg-go-soft text-go'
+                              : 'bg-stop-soft text-stop'
+                            : 'text-fg-muted hover:text-fg',
                         )}
                       >
-                        {d === 'long' ? <ArrowUpRight className="size-4" /> : <ArrowDownRight className="size-4" />}
+                        {d === 'long' ? (
+                          <ArrowUpRight className="size-4" />
+                        ) : (
+                          <ArrowDownRight className="size-4" />
+                        )}
                         {d}
                       </button>
                     ))}
                   </div>
                 </Field>
                 <Field label="Instrument">
-                  <Input value={f.instrument} onChange={(e) => setF({ ...f, instrument: e.target.value.toUpperCase() })} />
+                  <Input
+                    value={f.instrument}
+                    onChange={(e) => setF({ ...f, instrument: e.target.value.toUpperCase() })}
+                  />
                 </Field>
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <Field label="Entry" error={errors.entry}>
-                  <Input ref={entryRef} type="number" step="any" value={f.entry} onChange={(e) => setF({ ...f, entry: e.target.value })} invalid={!!errors.entry} data-testid="pc-entry" />
+                  <Input
+                    ref={entryRef}
+                    type="number"
+                    step="any"
+                    value={f.entry}
+                    onChange={(e) => setF({ ...f, entry: e.target.value })}
+                    invalid={!!errors.entry}
+                    data-testid="pc-entry"
+                  />
                 </Field>
                 <Field label="Stop" error={errors.stop}>
-                  <Input type="number" step="any" value={f.stop} onChange={(e) => setF({ ...f, stop: e.target.value })} invalid={!!errors.stop} data-testid="pc-stop" />
+                  <Input
+                    type="number"
+                    step="any"
+                    value={f.stop}
+                    onChange={(e) => setF({ ...f, stop: e.target.value })}
+                    invalid={!!errors.stop}
+                    data-testid="pc-stop"
+                  />
                 </Field>
                 <Field label="Target" error={errors.target}>
-                  <Input type="number" step="any" value={f.target} placeholder="optional" onChange={(e) => setF({ ...f, target: e.target.value })} />
+                  <Input
+                    type="number"
+                    step="any"
+                    value={f.target}
+                    placeholder="optional"
+                    onChange={(e) => setF({ ...f, target: e.target.value })}
+                  />
                 </Field>
               </div>
               <div className="grid grid-cols-[1fr_110px] gap-3">
                 <Field label="Setup">
-                  <Input list="pc-setups" value={f.setupTag} onChange={(e) => setF({ ...f, setupTag: e.target.value })} placeholder="your label" />
+                  <Input
+                    list="pc-setups"
+                    value={f.setupTag}
+                    onChange={(e) => setF({ ...f, setupTag: e.target.value })}
+                    placeholder="your label"
+                  />
                   <datalist id="pc-setups">
                     {[...new Set([...(tags.data ?? []), ...account.traderRules.setups])].map((t) => (
                       <option key={t} value={t} />
@@ -135,7 +215,13 @@ export function PrecheckPage() {
                   </datalist>
                 </Field>
                 <Field label="Risk %">
-                  <Input type="number" step="0.05" value={f.riskPct} placeholder={String(defaultRisk)} onChange={(e) => setF({ ...f, riskPct: e.target.value })} />
+                  <Input
+                    type="number"
+                    step="0.05"
+                    value={f.riskPct}
+                    placeholder={String(defaultRisk)}
+                    onChange={(e) => setF({ ...f, riskPct: e.target.value })}
+                  />
                 </Field>
               </div>
               <Field label="Why this trade, in one line?" error={errors.preNote}>
@@ -148,8 +234,17 @@ export function PrecheckPage() {
                   data-testid="pc-note"
                 />
               </Field>
-              {run.error && !(run.error instanceof ApiError && run.error.details) && <p className="text-sm text-stop">{errorText(run.error)}</p>}
-              <Button type="submit" variant="primary" size="lg" className="w-full" loading={run.isPending} data-testid="pc-submit">
+              {run.error && !(run.error instanceof ApiError && run.error.details) && (
+                <p className="text-sm text-stop">{errorText(run.error)}</p>
+              )}
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                className="w-full"
+                loading={run.isPending}
+                data-testid="pc-submit"
+              >
                 Check this trade <Kbd>↵</Kbd>
               </Button>
             </div>
@@ -163,7 +258,8 @@ export function PrecheckPage() {
               <Sigma className="size-6 text-fg-subtle" />
               <p className="mt-3 text-sm font-medium">Enter the trade you’re about to take</p>
               <p className="mt-1 max-w-sm text-sm text-fg-muted">
-                You’ll get position size, reward:risk, what’s left of today’s loss limit, your own history for this setup, and a calm check on your current state.
+                You’ll get position size, reward:risk, what’s left of today’s loss limit, your own history for
+                this setup, and a calm check on your current state.
               </p>
             </div>
           )}
@@ -174,13 +270,19 @@ export function PrecheckPage() {
               <ul className="divide-y divide-line text-sm">
                 {recent.data.slice(0, 6).map((p) => (
                   <li key={p.id} className="flex items-center gap-3 px-5 py-2.5">
-                    <Badge tone={p.verdict === 'go' ? 'go' : p.verdict === 'caution' ? 'caution' : 'stop'}>{p.verdict.toUpperCase()}</Badge>
+                    <Badge tone={p.verdict === 'go' ? 'go' : p.verdict === 'caution' ? 'caution' : 'stop'}>
+                      {p.verdict.toUpperCase()}
+                    </Badge>
                     <span className="num text-fg-muted">{fmtDateTime(p.createdAt)}</span>
                     <span className="flex-1 truncate">
                       {p.input.direction === 'long' ? 'Long' : 'Short'} {p.input.instrument} @ {p.input.entry}
                       {p.input.setupTag && <span className="text-fg-muted"> · {p.input.setupTag}</span>}
                     </span>
-                    {p.linkedTradeId ? <Badge tone="accent">logged</Badge> : <span className="text-xs text-fg-subtle">not taken</span>}
+                    {p.linkedTradeId ? (
+                      <Badge tone="accent">logged</Badge>
+                    ) : (
+                      <span className="text-xs text-fg-subtle">not taken</span>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -202,44 +304,100 @@ function Result({ r, currency, onLog }: { r: PrecheckDto; currency: string; onLo
       <div className={cn('flex items-start gap-4 rounded-[var(--radius-card)] border p-5', v.cls)}>
         <v.icon className="mt-0.5 size-7 shrink-0" />
         <div className="flex-1">
-          <div className="text-lg font-semibold" data-testid="verdict">{v.label}</div>
+          <div className="text-lg font-semibold" data-testid="verdict">
+            {v.label}
+          </div>
           <div className="text-sm opacity-80">{v.sub}</div>
           <ul className="mt-3 space-y-1.5">
-            {[...r.reasons].sort((a, b) => order[a.level] - order[b.level]).map((x) => (
-              <li key={x.code} className="flex items-start gap-2 text-sm text-fg">
-                {x.level === 'stop' ? <OctagonX className="mt-0.5 size-4 shrink-0 text-stop" /> : x.level === 'caution' ? <CircleAlert className="mt-0.5 size-4 shrink-0 text-caution" /> : <Info className="mt-0.5 size-4 shrink-0 text-fg-subtle" />}
-                {x.text}
-              </li>
-            ))}
+            {[...r.reasons]
+              .sort((a, b) => order[a.level] - order[b.level])
+              .map((x) => (
+                <li key={x.code} className="flex items-start gap-2 text-sm text-fg">
+                  {x.level === 'stop' ? (
+                    <OctagonX className="mt-0.5 size-4 shrink-0 text-stop" />
+                  ) : x.level === 'caution' ? (
+                    <CircleAlert className="mt-0.5 size-4 shrink-0 text-caution" />
+                  ) : (
+                    <Info className="mt-0.5 size-4 shrink-0 text-fg-subtle" />
+                  )}
+                  {x.text}
+                </li>
+              ))}
           </ul>
         </div>
-        <Button variant={r.verdict === 'stop' ? 'secondary' : 'primary'} icon={<ListPlus className="size-4" />} onClick={onLog} data-testid="log-from-check">
+        <Button
+          variant={r.verdict === 'stop' ? 'secondary' : 'primary'}
+          icon={<ListPlus className="size-4" />}
+          onClick={onLog}
+          data-testid="log-from-check"
+        >
           Log this trade
         </Button>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Num label="Position size" value={`${fmtNum(c.positionSizeLots, 2)} lots`} sub={`risk ${fmtMoney(c.sizing.actualRisk, currency)} (${c.sizing.actualRiskPct.toFixed(2)}%)`} title={c.sizing.formula} testId="pc-size" />
-        <Num label="Reward : risk" value={c.sizing.rewardRisk != null ? `${c.sizing.rewardRisk.toFixed(2)} : 1` : '—'} sub={c.sizing.rewardRisk != null ? 'target distance ÷ stop distance' : 'no target given'} />
+        <Num
+          label="Position size"
+          value={`${fmtNum(c.positionSizeLots, 2)} lots`}
+          sub={`risk ${fmtMoney(c.sizing.actualRisk, currency)} (${c.sizing.actualRiskPct.toFixed(2)}%)`}
+          title={c.sizing.formula}
+          testId="pc-size"
+        />
+        <Num
+          label="Reward : risk"
+          value={c.sizing.rewardRisk != null ? `${c.sizing.rewardRisk.toFixed(2)} : 1` : '—'}
+          sub={c.sizing.rewardRisk != null ? 'target distance ÷ stop distance' : 'no target given'}
+        />
         <Num
           label="Daily loss left after this trade"
           value={fmtMoney(c.dailyLossRemainingAfter, currency)}
           sub={`of ${fmtMoney(c.dailyLossRemaining, currency)} left today, if it hits the stop`}
-          tone={c.exceedsDailyBudget ? 'stop' : c.dailyLossRemainingAfter < c.sizing.actualRisk ? 'caution' : undefined}
+          tone={
+            c.exceedsDailyBudget
+              ? 'stop'
+              : c.dailyLossRemainingAfter < c.sizing.actualRisk
+                ? 'caution'
+                : undefined
+          }
         />
-        <Num label="Room to max-loss floor" value={fmtMoney(c.distanceToMaxLoss, currency)} sub={`floor ${fmtMoney(c.maxLossFloor, currency, 0)}`} tone={c.exceedsMaxLoss ? 'stop' : undefined} />
+        <Num
+          label="Room to max-loss floor"
+          value={fmtMoney(c.distanceToMaxLoss, currency)}
+          sub={`floor ${fmtMoney(c.maxLossFloor, currency, 0)}`}
+          tone={c.exceedsMaxLoss ? 'stop' : undefined}
+        />
       </div>
 
       <div className="grid gap-5 xl:grid-cols-2">
         <Card title="Today, against your rules">
           <dl className="space-y-2.5 text-sm">
-            <Row label="Trades today" value={`${c.tradesToday}${c.maxTradesPerDay ? ` / ${c.maxTradesPerDay}` : ''}`} warn={!!c.maxTradesPerDay && c.tradesToday >= c.maxTradesPerDay} />
-            <Row label="Losses in a row today" value={`${c.consecutiveLossesToday}${c.stopAfterLosses ? ` / ${c.stopAfterLosses}` : ''}`} warn={!!c.stopAfterLosses && c.consecutiveLossesToday >= c.stopAfterLosses} />
-            <Row label="Since last loss" value={fmtMinutes(c.minutesSinceLastLoss)} warn={c.minutesSinceLastLoss != null && c.minutesSinceLastLoss < c.cooldownMinutes} />
+            <Row
+              label="Trades today"
+              value={`${c.tradesToday}${c.maxTradesPerDay ? ` / ${c.maxTradesPerDay}` : ''}`}
+              warn={!!c.maxTradesPerDay && c.tradesToday >= c.maxTradesPerDay}
+            />
+            <Row
+              label="Losses in a row today"
+              value={`${c.consecutiveLossesToday}${c.stopAfterLosses ? ` / ${c.stopAfterLosses}` : ''}`}
+              warn={!!c.stopAfterLosses && c.consecutiveLossesToday >= c.stopAfterLosses}
+            />
+            <Row
+              label="Since last loss"
+              value={fmtMinutes(c.minutesSinceLastLoss)}
+              warn={c.minutesSinceLastLoss != null && c.minutesSinceLastLoss < c.cooldownMinutes}
+            />
           </dl>
           <div className="mt-4 border-t border-line pt-4">
             <div className="text-[12px] font-medium text-fg-muted">
-              Your history: “{c.history.setupTag ?? 'untagged'}” in the {c.session === 'ny' ? 'New York' : c.session === 'london' ? 'London' : c.session === 'asia' ? 'Asia' : 'off-hours'} session
+              Your history: “{c.history.setupTag ?? 'untagged'}” in the{' '}
+              {c.session === 'ny'
+                ? 'New York'
+                : c.session === 'london'
+                  ? 'London'
+                  : c.session === 'asia'
+                    ? 'Asia'
+                    : 'off-hours'}{' '}
+              session
             </div>
             {h ? (
               <div className="num mt-1.5 flex gap-5 text-sm">
@@ -259,17 +417,37 @@ function Result({ r, currency, onLog }: { r: PrecheckDto; currency: string; onLo
               <Row
                 label="Tilt risk"
                 value={
-                  <Badge tone={r.jev.tilt_risk!.uncertain ? 'neutral' : r.jev.tilt_risk!.score === 0 ? 'go' : r.jev.tilt_risk!.score === 1 ? 'caution' : 'stop'}>
+                  <Badge
+                    tone={
+                      r.jev.tilt_risk!.uncertain
+                        ? 'neutral'
+                        : r.jev.tilt_risk!.score === 0
+                          ? 'go'
+                          : r.jev.tilt_risk!.score === 1
+                            ? 'caution'
+                            : 'stop'
+                    }
+                  >
                     {r.jev.tilt_risk!.value}
                     {r.jev.tilt_risk!.uncertain && ' · uncertain'}
                   </Badge>
                 }
               />
-              <Row label="Note matches one of your setups" value={<Prob p={r.jev.matches_stated_setup!.p} uncertain={r.jev.matches_stated_setup!.uncertain} />} />
-              <Row label="Reads like an impulse" value={<Prob p={r.jev.likely_impulse!.p} uncertain={r.jev.likely_impulse!.uncertain} />} />
+              <Row
+                label="Note matches one of your setups"
+                value={
+                  <Prob p={r.jev.matches_stated_setup!.p} uncertain={r.jev.matches_stated_setup!.uncertain} />
+                }
+              />
+              <Row
+                label="Reads like an impulse"
+                value={<Prob p={r.jev.likely_impulse!.p} uncertain={r.jev.likely_impulse!.uncertain} />}
+              />
             </dl>
           ) : (
-            <p className="text-sm text-fg-muted">The state check couldn’t run just now. The verdict above uses your own rules only.</p>
+            <p className="text-sm text-fg-muted">
+              The state check couldn’t run just now. The verdict above uses your own rules only.
+            </p>
           )}
         </Card>
       </div>
@@ -279,14 +457,41 @@ function Result({ r, currency, onLog }: { r: PrecheckDto; currency: string; onLo
 
 function Prob({ p, uncertain }: { p: number; uncertain: boolean }) {
   if (uncertain) return <Badge>uncertain</Badge>;
-  return <span className="num">{p >= 0.65 ? 'Yes' : 'No'} <span className="text-fg-subtle">({Math.round(p * 100)}%)</span></span>;
+  return (
+    <span className="num">
+      {p >= 0.65 ? 'Yes' : 'No'} <span className="text-fg-subtle">({Math.round(p * 100)}%)</span>
+    </span>
+  );
 }
 
-function Num({ label, value, sub, tone, title, testId }: { label: string; value: string; sub: string; tone?: 'stop' | 'caution'; title?: string; testId?: string }) {
+function Num({
+  label,
+  value,
+  sub,
+  tone,
+  title,
+  testId,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  tone?: 'stop' | 'caution';
+  title?: string;
+  testId?: string;
+}) {
   return (
     <div className="rounded-xl border border-line bg-surface px-4 py-3.5" title={title}>
       <div className="text-[12px] font-medium text-fg-muted">{label}</div>
-      <div data-testid={testId} className={cn('num mt-1 text-xl font-semibold', tone === 'stop' && 'text-stop', tone === 'caution' && 'text-caution')}>{value}</div>
+      <div
+        data-testid={testId}
+        className={cn(
+          'num mt-1 text-xl font-semibold',
+          tone === 'stop' && 'text-stop',
+          tone === 'caution' && 'text-caution',
+        )}
+      >
+        {value}
+      </div>
       <div className="mt-1 text-xs text-fg-subtle">{sub}</div>
     </div>
   );

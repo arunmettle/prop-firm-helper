@@ -48,7 +48,12 @@ export interface AccountStatus {
 }
 
 /** Live account status: rule engine over closed trades, "now" = asOf. */
-export async function accountStatus(db: Tx, account: Account, asOf = new Date(), openTradeRisk?: number | null): Promise<AccountStatus> {
+export async function accountStatus(
+  db: Tx,
+  account: Account,
+  asOf = new Date(),
+  openTradeRisk?: number | null,
+): Promise<AccountStatus> {
   const rules = ruleSchema.parse(account.rules);
   const rows = await db
     .select({ openedAt: trades.openedAt, closedAt: trades.closedAt, pnl: trades.pnl })
@@ -70,4 +75,3 @@ export async function accountStatus(db: Tx, account: Account, asOf = new Date(),
     openTrades: rows.filter((r) => !r.closedAt).length,
   };
 }
-

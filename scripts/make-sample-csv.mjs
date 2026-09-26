@@ -3,14 +3,44 @@
 import { writeFileSync } from 'node:fs';
 
 let s = 42;
-const rnd = () => ((s = (s * 1664525 + 1013904223) % 4294967296) / 4294967296);
+const rnd = () => (s = (s * 1664525 + 1013904223) % 4294967296) / 4294967296;
 const pad = (n) => String(n).padStart(2, '0');
-const fmt = (d) => `${d.getUTCFullYear()}.${pad(d.getUTCMonth() + 1)}.${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
+const fmt = (d) =>
+  `${d.getUTCFullYear()}.${pad(d.getUTCMonth() + 1)}.${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
 
-const planNotes = ['London breakout retest, structure clean', 'NY open liquidity sweep then reclaim', 'Pullback to 4h demand, confirmation candle', 'Asia range break with retest'];
-const tiltNotes = ['Need to make back the last loss', 'Missed the move, jumping in before it runs', 'Price is flying, getting in now', 'Bored, small scalp', 'Should have held last one, going bigger'];
+const planNotes = [
+  'London breakout retest, structure clean',
+  'NY open liquidity sweep then reclaim',
+  'Pullback to 4h demand, confirmation candle',
+  'Asia range break with retest',
+];
+const tiltNotes = [
+  'Need to make back the last loss',
+  'Missed the move, jumping in before it runs',
+  'Price is flying, getting in now',
+  'Bored, small scalp',
+  'Should have held last one, going bigger',
+];
 
-const rows = [['Ticket', 'Account', 'Name', 'Open Time', 'Type', 'Size', 'Item', 'Price', 'S / L', 'T / P', 'Close Time', 'Close Price', 'Commission', 'Profit', 'Comment']];
+const rows = [
+  [
+    'Ticket',
+    'Account',
+    'Name',
+    'Open Time',
+    'Type',
+    'Size',
+    'Item',
+    'Price',
+    'S / L',
+    'T / P',
+    'Close Time',
+    'Close Price',
+    'Commission',
+    'Profit',
+    'Comment',
+  ],
+];
 let day = Date.UTC(2026, 5, 1);
 let ticket = 7001000;
 let lossStreak = 0;
@@ -34,13 +64,34 @@ while (rows.length < 81) {
       const exit = +(entry + (long ? 1 : -1) * r * riskPts).toFixed(2);
       const close = t + (20 + Math.floor(rnd() * 90)) * 60e3;
       const profit = +((exit - entry) * (long ? 1 : -1) * size * 100).toFixed(2);
-      const note = tilt ? tiltNotes[Math.floor(rnd() * tiltNotes.length)] : planNotes[Math.floor(rnd() * planNotes.length)];
-      rows.push([ticket++, '51234567', 'Jo Trader', fmt(new Date(t)), long ? 'buy' : 'sell', size.toFixed(2), 'xauusd', entry, stop, target, fmt(new Date(close)), exit, '-3.50', profit, note]);
+      const note = tilt
+        ? tiltNotes[Math.floor(rnd() * tiltNotes.length)]
+        : planNotes[Math.floor(rnd() * planNotes.length)];
+      rows.push([
+        ticket++,
+        '51234567',
+        'Jo Trader',
+        fmt(new Date(t)),
+        long ? 'buy' : 'sell',
+        size.toFixed(2),
+        'xauusd',
+        entry,
+        stop,
+        target,
+        fmt(new Date(close)),
+        exit,
+        '-3.50',
+        profit,
+        note,
+      ]);
       lossStreak = profit < 0 ? lossStreak + 1 : 0;
       t = close + (tilt || profit < 0 ? 5 + Math.floor(rnd() * 20) : 45 + Math.floor(rnd() * 120)) * 60e3;
     }
   }
   day += 86400e3;
 }
-writeFileSync(new URL('../samples/mt4-history-sample.csv', import.meta.url), rows.map((r) => r.map((c) => (/[",]/.test(String(c)) ? `"${c}"` : c)).join(',')).join('\n') + '\n');
+writeFileSync(
+  new URL('../samples/mt4-history-sample.csv', import.meta.url),
+  rows.map((r) => r.map((c) => (/[",]/.test(String(c)) ? `"${c}"` : c)).join(',')).join('\n') + '\n',
+);
 console.log('wrote', rows.length - 1, 'rows');

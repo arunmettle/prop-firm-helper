@@ -8,7 +8,8 @@ import { TradeTable } from './TradeTable';
 export function RecentTrades({ account }: { account: AccountDto }) {
   const q = useQuery({
     queryKey: ['trades', 'recent', account.id],
-    queryFn: () => api.get<{ trades: TradeDto[]; total: number }>(`/api/trades?accountId=${account.id}&limit=6`),
+    queryFn: () =>
+      api.get<{ trades: TradeDto[]; total: number }>(`/api/trades?accountId=${account.id}&limit=6`),
   });
   return (
     <Card
@@ -34,7 +35,9 @@ export function RecentTrades({ account }: { account: AccountDto }) {
           .
         </p>
       )}
-      {q.data && q.data.trades.length > 0 && <TradeTable trades={q.data.trades} currency={account.currency} compact />}
+      {q.data && q.data.trades.length > 0 && (
+        <TradeTable trades={q.data.trades} currency={account.currency} compact />
+      )}
     </Card>
   );
 }

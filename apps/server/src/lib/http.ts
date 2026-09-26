@@ -41,6 +41,9 @@ export function errorHandler(err: unknown, req: FastifyRequest, reply: FastifyRe
     return reply.status(anyErr.statusCode).send({ error: anyErr.message ?? 'Request error' });
   }
   // Log only the error name/message and route — never request bodies (they can contain trade notes).
-  req.log.error({ err: { name: anyErr.name, message: anyErr.message }, route: req.routeOptions?.url }, 'unhandled');
+  req.log.error(
+    { err: { name: anyErr.name, message: anyErr.message }, route: req.routeOptions?.url },
+    'unhandled',
+  );
   return reply.status(500).send({ error: 'Something went wrong on our side. Please try again.' });
 }

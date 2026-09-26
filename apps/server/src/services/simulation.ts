@@ -11,7 +11,11 @@ import { computeProfile } from './profile.js';
 
 export const SIM_COST = 1;
 
-export function buildSimConfig(account: Account, profile: BehaviourProfile, opts: { runs: number; seed: number }): SimConfig {
+export function buildSimConfig(
+  account: Account,
+  profile: BehaviourProfile,
+  opts: { runs: number; seed: number },
+): SimConfig {
   const rules = ruleSchema.parse(account.rules);
   const tr = parseTraderRules(account.traderRules);
   const probs: SimConfig['measured']['probs'] = {};
@@ -42,7 +46,12 @@ export function buildSimConfig(account: Account, profile: BehaviourProfile, opts
 }
 
 /** Charge 1 credit and enqueue the job in ONE transaction. */
-export async function startSimulation(ctx: AppCtx, userId: string, account: Account, opts: { runs: number; seed?: number }) {
+export async function startSimulation(
+  ctx: AppCtx,
+  userId: string,
+  account: Account,
+  opts: { runs: number; seed?: number },
+) {
   const profile = await computeProfile(ctx.db, account);
   const seed = opts.seed ?? Math.floor(Math.random() * 2 ** 31);
   const config = buildSimConfig(account, profile, { runs: opts.runs, seed });
@@ -66,12 +75,21 @@ export async function simulateJob(ctx: AppCtx, payload: Record<string, unknown>)
   if (!run || run.status === 'done') return;
   await ctx.db.update(simulationRuns).set({ status: 'running' }).where(eq(simulationRuns.id, runId));
   const result = runSimulation(run.config as SimConfig);
-  console.info(`[sim] run=${runId} scenarios=${result.scenarios.length} runs=${result.runs} elapsed_ms=${result.elapsedMs}`);
-  await ctx.db.update(simulationRuns).set({ status: 'done', result, error: null }).where(eq(simulationRuns.id, runId));
+  console.info(
+    `[sim] run=${runId} scenarios=${result.scenarios.length} runs=${result.runs} elapsed_ms=${result.elapsedMs}`,
+  );
+  await ctx.db
+    .update(simulationRuns)
+    .set({ status: 'done', result, error: null })
+    .where(eq(simulationRuns.id, runId));
 }
 
 /** Final failure: mark failed and refund automatically (idempotent via the ledger's unique (reason, ref_id)). */
-export async function simulateFailed(ctx: AppCtx, payload: Record<string, unknown>, error: string): Promise<void> {
+export async function simulateFailed(
+  ctx: AppCtx,
+  payload: Record<string, unknown>,
+  error: string,
+): Promise<void> {
   const runId = String(payload.runId);
   await ctx.db.transaction(async (tx: Tx) => {
     const [run] = await tx
@@ -104,4 +122,3 @@ export function simulationDto(r: typeof simulationRuns.$inferSelect, withResult 
     result: withResult ? r.result : undefined,
   };
 }
-

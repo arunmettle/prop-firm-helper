@@ -11,12 +11,26 @@ describe('note labelling (fake Jev)', () => {
   beforeAll(async () => {
     env = await setupTestEnv();
     a = await signIn(env, 'label@example.com');
-    accountId = (await env.app.inject({ method: 'POST', url: '/api/accounts', headers: { cookie: a }, payload: accountBody() })).json().id;
+    accountId = (
+      await env.app.inject({
+        method: 'POST',
+        url: '/api/accounts',
+        headers: { cookie: a },
+        payload: accountBody(),
+      })
+    ).json().id;
   });
   afterAll(async () => env.close());
 
   it('labels a trade in the background', async () => {
-    const t = (await env.app.inject({ method: 'POST', url: '/api/trades', headers: { cookie: a }, payload: tradeBody(accountId) })).json().trade;
+    const t = (
+      await env.app.inject({
+        method: 'POST',
+        url: '/api/trades',
+        headers: { cookie: a },
+        payload: tradeBody(accountId),
+      })
+    ).json().trade;
     expect(t.labelsStatus).toBe('pending');
     await runJobs(env);
     const after = (await env.app.inject({ url: `/api/trades/${t.id}`, headers: { cookie: a } })).json();
@@ -31,7 +45,13 @@ describe('note labelling (fake Jev)', () => {
         method: 'POST',
         url: '/api/trades',
         headers: { cookie: a },
-        payload: tradeBody(accountId, { overrideFlag: true, overrideKind: 'closed_early', overrideNote: 'closed before CPI news as per my rule', exitPrice: 2405, exitType: 'manual_close' }),
+        payload: tradeBody(accountId, {
+          overrideFlag: true,
+          overrideKind: 'closed_early',
+          overrideNote: 'closed before CPI news as per my rule',
+          exitPrice: 2405,
+          exitType: 'manual_close',
+        }),
       })
     ).json().trade;
     await runJobs(env);
@@ -41,7 +61,12 @@ describe('note labelling (fake Jev)', () => {
 
   it('trades without any note are not sent to Jev', async () => {
     const t = (
-      await env.app.inject({ method: 'POST', url: '/api/trades', headers: { cookie: a }, payload: tradeBody(accountId, { preNote: null }) })
+      await env.app.inject({
+        method: 'POST',
+        url: '/api/trades',
+        headers: { cookie: a },
+        payload: tradeBody(accountId, { preNote: null }),
+      })
     ).json().trade;
     expect(t.labelsStatus).toBe('none');
   });
@@ -55,15 +80,30 @@ describe('note labelling (fake Jev)', () => {
 
   it('keepRawNotes=false removes note text after classification and keeps labels', async () => {
     const s = (await env.app.inject({ url: '/api/settings', headers: { cookie: a } })).json();
-    await env.app.inject({ method: 'PUT', url: '/api/settings', headers: { cookie: a }, payload: { ...s, keepRawNotes: false } });
+    await env.app.inject({
+      method: 'PUT',
+      url: '/api/settings',
+      headers: { cookie: a },
+      payload: { ...s, keepRawNotes: false },
+    });
     const t = (
-      await env.app.inject({ method: 'POST', url: '/api/trades', headers: { cookie: a }, payload: tradeBody(accountId, { preNote: 'Need to make back the last loss' }) })
+      await env.app.inject({
+        method: 'POST',
+        url: '/api/trades',
+        headers: { cookie: a },
+        payload: tradeBody(accountId, { preNote: 'Need to make back the last loss' }),
+      })
     ).json().trade;
     await runJobs(env);
     const after = (await env.app.inject({ url: `/api/trades/${t.id}`, headers: { cookie: a } })).json();
     expect(after.preNote).toBeNull();
     expect(after.noteLabels.primary_driver.value).toBe('revenge');
-    await env.app.inject({ method: 'PUT', url: '/api/settings', headers: { cookie: a }, payload: { ...s, keepRawNotes: true } });
+    await env.app.inject({
+      method: 'PUT',
+      url: '/api/settings',
+      headers: { cookie: a },
+      payload: { ...s, keepRawNotes: true },
+    });
   });
 });
 
@@ -75,12 +115,26 @@ describe('note labelling failures', () => {
   beforeAll(async () => {
     env = await setupTestEnv({}, createJevClient(transport, { sleep: async () => {} }));
     a = await signIn(env, 'fail@example.com');
-    accountId = (await env.app.inject({ method: 'POST', url: '/api/accounts', headers: { cookie: a }, payload: accountBody() })).json().id;
+    accountId = (
+      await env.app.inject({
+        method: 'POST',
+        url: '/api/accounts',
+        headers: { cookie: a },
+        payload: accountBody(),
+      })
+    ).json().id;
   });
   afterAll(async () => env.close());
 
   it('marks the trade failed after retries and never guesses a label', async () => {
-    const t = (await env.app.inject({ method: 'POST', url: '/api/trades', headers: { cookie: a }, payload: tradeBody(accountId) })).json().trade;
+    const t = (
+      await env.app.inject({
+        method: 'POST',
+        url: '/api/trades',
+        headers: { cookie: a },
+        payload: tradeBody(accountId),
+      })
+    ).json().trade;
     await runJobs(env);
     const after = (await env.app.inject({ url: `/api/trades/${t.id}`, headers: { cookie: a } })).json();
     expect(after.labelsStatus).toBe('failed');
@@ -89,7 +143,12 @@ describe('note labelling failures', () => {
   });
 
   it('re-label queues failed trades again', async () => {
-    const r = await env.app.inject({ method: 'POST', url: '/api/trades/relabel', headers: { cookie: a }, payload: { accountId } });
+    const r = await env.app.inject({
+      method: 'POST',
+      url: '/api/trades/relabel',
+      headers: { cookie: a },
+      payload: { accountId },
+    });
     expect(r.json().queued).toBe(1);
   });
 });

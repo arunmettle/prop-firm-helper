@@ -3,7 +3,14 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import type { AppCtx } from '../ctx.js';
 import { loginTokens, sessions, users } from '../db/schema.js';
-import { createSession, isAdmin, requireUser, currentUser, SESSION_COOKIE, setSessionCookie } from '../lib/auth.js';
+import {
+  createSession,
+  isAdmin,
+  requireUser,
+  currentUser,
+  SESSION_COOKIE,
+  setSessionCookie,
+} from '../lib/auth.js';
 import { randomToken, sha256 } from '../lib/crypto.js';
 import { HttpError, parse } from '../lib/http.js';
 import { parseUserSettings } from '@cooldown/core';
@@ -42,7 +49,11 @@ export async function authRoutes(app: FastifyInstance, ctx: AppCtx) {
         .update(loginTokens)
         .set({ usedAt: new Date() })
         .where(
-          and(eq(loginTokens.tokenHash, sha256(token)), isNull(loginTokens.usedAt), gt(loginTokens.expiresAt, new Date())),
+          and(
+            eq(loginTokens.tokenHash, sha256(token)),
+            isNull(loginTokens.usedAt),
+            gt(loginTokens.expiresAt, new Date()),
+          ),
         )
         .returning();
       if (!row) throw new HttpError(400, 'This sign-in link is invalid or has expired. Request a new one.');

@@ -33,7 +33,12 @@ export async function setupTestEnv(env: Record<string, string> = {}, jev?: JevCl
   await runMigrations(db);
   await db.execute(sql`truncate users, login_tokens, jobs cascade`);
   const email = new MemoryEmailSender();
-  const ctx: AppCtx = { cfg, db, email, jev: jev ?? createJevClient(new FakeJevTransport(), { sleep: async () => {} }) };
+  const ctx: AppCtx = {
+    cfg,
+    db,
+    email,
+    jev: jev ?? createJevClient(new FakeJevTransport(), { sleep: async () => {} }),
+  };
   const app = await buildApp(ctx, { logger: true });
   return {
     ctx,

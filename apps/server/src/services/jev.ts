@@ -15,7 +15,9 @@ import { jevUsage } from '../db/schema.js';
 export function createJevFromConfig(cfg: Config): JevClient {
   switch (cfg.jev.provider) {
     case 'cloudflare':
-      return createJevClient(new CloudflareJevTransport(cfg.jev.cloudflareAccountId, cfg.jev.cloudflareApiToken));
+      return createJevClient(
+        new CloudflareJevTransport(cfg.jev.cloudflareAccountId, cfg.jev.cloudflareApiToken),
+      );
     case 'typesafe':
       return createJevClient(new TypesafeJevTransport(cfg.jev.typesafeApiKey));
     default:
@@ -43,7 +45,13 @@ export async function callJev<Q extends Questions>(
     );
     await ctx.db
       .insert(jevUsage)
-      .values({ userId, day, calls: 1, inputTokens: r.usage.input_tokens, outputTokens: r.usage.output_tokens })
+      .values({
+        userId,
+        day,
+        calls: 1,
+        inputTokens: r.usage.input_tokens,
+        outputTokens: r.usage.output_tokens,
+      })
       .onConflictDoUpdate({
         target: [jevUsage.userId, jevUsage.day],
         set: {
@@ -55,7 +63,9 @@ export async function callJev<Q extends Questions>(
       });
     return r;
   } catch (err) {
-    console.warn(`[jev] purpose=${purpose} provider=${ctx.jev.provider} keys=${keys} status=failed error=${(err as Error).name}`);
+    console.warn(
+      `[jev] purpose=${purpose} provider=${ctx.jev.provider} keys=${keys} status=failed error=${(err as Error).name}`,
+    );
     await ctx.db
       .insert(jevUsage)
       .values({ userId, day, failures: 1 })

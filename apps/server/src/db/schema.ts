@@ -65,7 +65,9 @@ export const accounts = pgTable(
     /** Trader's own rules (risk %, max trades/day, stop after N losses, setups). */
     traderRules: jsonb('trader_rules').notNull().default({}),
     startDate: timestamp('start_date', { withTimezone: true }),
-    status: text('status', { enum: ['active', 'archived'] }).notNull().default('active'),
+    status: text('status', { enum: ['active', 'archived'] })
+      .notNull()
+      .default('active'),
     ...timestamps,
   },
   (t) => [index('accounts_user_idx').on(t.userId)],
@@ -101,7 +103,9 @@ export const trades = pgTable(
       enum: ['moved_stop', 'moved_target', 'closed_early', 'added_size', 'removed_stop'],
     }),
     overrideNote: text('override_note'),
-    source: text('source', { enum: ['manual', 'csv'] }).notNull().default('manual'),
+    source: text('source', { enum: ['manual', 'csv'] })
+      .notNull()
+      .default('manual'),
     noteLabels: jsonb('note_labels'),
     labelsVersion: text('labels_version'),
     labelsStatus: text('labels_status', { enum: ['pending', 'done', 'failed', 'none'] })
@@ -183,7 +187,9 @@ export const creditsLedger = pgTable(
   (t) => [
     index('ledger_user_idx').on(t.userId),
     // Idempotency: one purchase per Stripe session, one charge/refund per simulation.
-    uniqueIndex('ledger_reason_ref_uq').on(t.reason, t.refId).where(sql`${t.refId} is not null`),
+    uniqueIndex('ledger_reason_ref_uq')
+      .on(t.reason, t.refId)
+      .where(sql`${t.refId} is not null`),
   ],
 );
 

@@ -83,7 +83,12 @@ export interface BehaviourProfile {
       medianMinutesAfterWin: number | null;
       nAfterWin: number;
     };
-    tradesPerDay: { distribution: { trades: number; days: number }[]; days: number; overMaxDays: string[]; overMaxTradeIds: string[] };
+    tradesPerDay: {
+      distribution: { trades: number; days: number }[];
+      days: number;
+      overMaxDays: string[];
+      overMaxTradeIds: string[];
+    };
     overrides: {
       n: number;
       rate: number | null;
@@ -137,7 +142,9 @@ export function buildProfile(
     return m;
   };
 
-  const bySetup = [...group((t) => t.setupTag ?? 'Untagged')].map(([k, v]) => groupStat(k, v)).sort((a, b) => b.n - a.n);
+  const bySetup = [...group((t) => t.setupTag ?? 'Untagged')]
+    .map(([k, v]) => groupStat(k, v))
+    .sort((a, b) => b.n - a.n);
   const sessionOrder = ['asia', 'london', 'ny', 'off'];
   const bySession = [...group((t) => sessionOf(new Date(t.open), sessions))]
     .map(([k, v]) => groupStat(k, v))
@@ -148,21 +155,29 @@ export function buildProfile(
 
   const afterLoss = et.filter((t) => t.prevOutcome === 'loss');
   const afterWin = et.filter((t) => t.prevOutcome === 'win');
-  const avgSize = (ts: EnrichedTrade[]) => (ts.length ? ts.reduce((s, t) => s + t.size, 0) / ts.length : null);
+  const avgSize = (ts: EnrichedTrade[]) =>
+    ts.length ? ts.reduce((s, t) => s + t.size, 0) / ts.length : null;
   const ratio = (x: number | null) => (x !== null && baseline ? roundTo(x / baseline, 2) : null);
 
   // Trades per day
   const days = group((t) => t.day);
   const dist = new Map<number, number>();
   for (const [, v] of days) dist.set(v.length, (dist.get(v.length) ?? 0) + 1);
-  const overMaxDays = ctx.maxTradesPerDay ? [...days].filter(([, v]) => v.length > ctx.maxTradesPerDay!).map(([k]) => k) : [];
+  const overMaxDays = ctx.maxTradesPerDay
+    ? [...days].filter(([, v]) => v.length > ctx.maxTradesPerDay!).map(([k]) => k)
+    : [];
 
   // Overrides
   const ov = et.filter((t) => t.overrideFlag);
-  const byKind = [...group((t) => (t.overrideFlag ? (t.overrideKind ?? 'other') : null))].map(([k, v]) => groupStat(k, v));
+  const byKind = [...group((t) => (t.overrideFlag ? (t.overrideKind ?? 'other') : null))].map(([k, v]) =>
+    groupStat(k, v),
+  );
 
   // Soon after a loss
-  const within = et.filter((t) => t.minutesSinceLoss !== null && t.minutesSinceLoss <= ctx.cooldownMinutes && t.prevOutcome === 'loss');
+  const within = et.filter(
+    (t) =>
+      t.minutesSinceLoss !== null && t.minutesSinceLoss <= ctx.cooldownMinutes && t.prevOutcome === 'loss',
+  );
   const withinIds = new Set(within.map((t) => t.id));
 
   // Stop-after-N compliance: per day, did the losing streak (within the day) reach N, and were trades taken after?
@@ -195,38 +210,60 @@ export function buildProfile(
   // Jev-derived aggregates
   const certain = et.filter((t) => t.noteLabels && !t.noteLabels.primary_driver.uncertain);
   const uncertainN = et.filter((t) => t.noteLabels && t.noteLabels.primary_driver.uncertain).length;
-  const byDriver = [...group((t) => (t.noteLabels && !t.noteLabels.primary_driver.uncertain ? t.noteLabels.primary_driver.value : null))]
+  const byDriver = [
+    ...group((t) =>
+      t.noteLabels && !t.noteLabels.primary_driver.uncertain ? t.noteLabels.primary_driver.value : null,
+    ),
+  ]
     .map(([k, v]) => groupStat(k, v))
     .sort((a, b) => b.n - a.n);
   const adherenceKnown = et.filter((t) => t.noteLabels && !t.noteLabels.followed_own_plan.uncertain);
   const share = (ts: EnrichedTrade[]) => {
     const c = ts.filter((t) => t.noteLabels && !t.noteLabels.primary_driver.uncertain);
     const m = new Map<string, number>();
-    for (const t of c) m.set(t.noteLabels!.primary_driver.value, (m.get(t.noteLabels!.primary_driver.value) ?? 0) + 1);
+    for (const t of c)
+      m.set(t.noteLabels!.primary_driver.value, (m.get(t.noteLabels!.primary_driver.value) ?? 0) + 1);
     return [...m].map(([key, n]) => ({ key, n, share: n / c.length })).sort((a, b) => b.n - a.n);
   };
 
   // Pools for the simulator
   const planT = et.filter((t) => t.rMultiple !== null && !beh.get(t.id)!.tilt);
   const tiltT = et.filter((t) => t.rMultiple !== null && beh.get(t.id)!.tilt);
-  const plannedPerDay = [...days].map(([, v]) => v.filter((t) => !beh.get(t.id)!.extraTrade).length).filter((n) => n > 0);
+  const plannedPerDay = [...days]
+    .map(([, v]) => v.filter((t) => !beh.get(t.id)!.extraTrade).length)
+    .filter((n) => n > 0);
 
   const conditionalProbs = buildConditionalProbs(et, beh, prechecks, ctx, baseline, sizeBasis);
 
   const metrics: BehaviourProfile['metrics'] = {
     overall: { ...overall, expectancyMoney: et.length ? roundTo(overall.netPnl / et.length, 2) : null },
-    rDistribution: R_BINS.map(([bin, lo, hi]) => ({ bin, n: et.filter((t) => t.rMultiple !== null && t.rMultiple > lo && t.rMultiple <= hi).length })),
+    rDistribution: R_BINS.map(([bin, lo, hi]) => ({
+      bin,
+      n: et.filter((t) => t.rMultiple !== null && t.rMultiple > lo && t.rMultiple <= hi).length,
+    })),
     bySetup,
     bySession,
     byWeekday,
     sizing: {
       basis: sizeBasis,
       baseline: baseline !== null ? roundTo(baseline, 2) : null,
-      afterLoss: { n: afterLoss.length, avg: avgSize(afterLoss), ratio: ratio(avgSize(afterLoss)), tradeIds: afterLoss.map((t) => t.id) },
-      afterWin: { n: afterWin.length, avg: avgSize(afterWin), ratio: ratio(avgSize(afterWin)), tradeIds: afterWin.map((t) => t.id) },
+      afterLoss: {
+        n: afterLoss.length,
+        avg: avgSize(afterLoss),
+        ratio: ratio(avgSize(afterLoss)),
+        tradeIds: afterLoss.map((t) => t.id),
+      },
+      afterWin: {
+        n: afterWin.length,
+        avg: avgSize(afterWin),
+        ratio: ratio(avgSize(afterWin)),
+        tradeIds: afterWin.map((t) => t.id),
+      },
     },
     reentry: {
-      medianMinutesAfterLoss: median(afterLoss.map((t) => t.minutesSincePrevClose!).filter((x) => x !== null)),
+      medianMinutesAfterLoss: median(
+        afterLoss.map((t) => t.minutesSincePrevClose!).filter((x) => x !== null),
+      ),
       nAfterLoss: afterLoss.length,
       medianMinutesAfterWin: median(afterWin.map((t) => t.minutesSincePrevClose!).filter((x) => x !== null)),
       nAfterWin: afterWin.length,
@@ -241,13 +278,19 @@ export function buildProfile(
       n: ov.length,
       rate: et.length ? ov.length / et.length : null,
       overridden: groupStat('overridden', ov),
-      notOverridden: groupStat('not overridden', et.filter((t) => !t.overrideFlag)),
+      notOverridden: groupStat(
+        'not overridden',
+        et.filter((t) => !t.overrideFlag),
+      ),
       byKind,
     },
     soonAfterLoss: {
       minutes: ctx.cooldownMinutes,
       within: groupStat('within', within),
-      others: groupStat('others', et.filter((t) => !withinIds.has(t.id))),
+      others: groupStat(
+        'others',
+        et.filter((t) => !withinIds.has(t.id)),
+      ),
     },
     stopAfterLosses: {
       rule: ctx.stopAfterLosses,
@@ -262,7 +305,10 @@ export function buildProfile(
       byDriver,
       planAdherence: {
         n: adherenceKnown.length,
-        rate: adherenceKnown.length ? adherenceKnown.filter((t) => t.noteLabels!.followed_own_plan.p >= 0.65).length / adherenceKnown.length : null,
+        rate: adherenceKnown.length
+          ? adherenceKnown.filter((t) => t.noteLabels!.followed_own_plan.p >= 0.65).length /
+            adherenceKnown.length
+          : null,
       },
       driverAfterLoss: share(afterLoss),
       driverAfterWin: share(afterWin),
@@ -331,7 +377,12 @@ export function buildInsights(m: BehaviourProfile['metrics']): Insight[] {
     });
   }
   const o = m.overrides;
-  if (o.overridden.nR >= MIN_N && o.notOverridden.nR >= MIN_N && o.overridden.avgR !== null && o.notOverridden.avgR !== null) {
+  if (
+    o.overridden.nR >= MIN_N &&
+    o.notOverridden.nR >= MIN_N &&
+    o.overridden.avgR !== null &&
+    o.notOverridden.avgR !== null
+  ) {
     out.push({
       id: 'overrides',
       text: `Trades where you changed the plan mid-trade: ${o.overridden.n} (${pct(o.rate ?? 0)}), average ${fmtR(o.overridden.avgR)} vs ${fmtR(o.notOverridden.avgR)} when you left it alone.`,

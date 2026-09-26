@@ -26,7 +26,10 @@ export function createJevClient(transport: JevTransport, opts: RetryOptions = {}
           const answers = validateAnswers(questions, raw.answers);
           return {
             answers,
-            usage: { input_tokens: raw.usage?.input_tokens ?? 0, output_tokens: raw.usage?.output_tokens ?? 0 },
+            usage: {
+              input_tokens: raw.usage?.input_tokens ?? 0,
+              output_tokens: raw.usage?.output_tokens ?? 0,
+            },
             latencyMs: Math.round(now() - t0),
             provider: transport.provider,
           };

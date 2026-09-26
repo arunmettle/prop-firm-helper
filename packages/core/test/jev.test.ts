@@ -46,7 +46,10 @@ describe('jev client', () => {
     const rev = await c.evaluate({ pre_note: 'Need to make back the last loss' }, LABEL_QUESTIONS);
     expect(rev.answers.primary_driver.choice).toBe('revenge');
     expect(rev.answers.impulsiveness.score).toBe(2);
-    const fomo = await c.evaluate({ pre_note: 'Missed the move, jumping in before it runs' }, LABEL_QUESTIONS);
+    const fomo = await c.evaluate(
+      { pre_note: 'Missed the move, jumping in before it runs' },
+      LABEL_QUESTIONS,
+    );
     expect(fomo.answers.primary_driver.choice).toBe('fomo');
   });
 
@@ -73,7 +76,13 @@ describe('jev client', () => {
   it('rejects an out-of-range choice or score', async () => {
     const bad: JevTransport = {
       provider: 'fake',
-      call: async () => ({ answers: { primary_driver: { choice: 'panic', confidence: 0.9 }, followed_own_plan: { noul: 0.5 }, impulsiveness: { score: 7, confidence: 0.9 } } }),
+      call: async () => ({
+        answers: {
+          primary_driver: { choice: 'panic', confidence: 0.9 },
+          followed_own_plan: { noul: 0.5 },
+          impulsiveness: { score: 7, confidence: 0.9 },
+        },
+      }),
     };
     await expect(createJevClient(bad, noSleep).evaluate({}, NOTE_CLASSIFIER_V1)).rejects.toThrow();
   });
@@ -92,20 +101,32 @@ describe('jev client', () => {
   });
 
   it('the typesafe stub throws a clear error', async () => {
-    await expect(createJevClient(new TypesafeJevTransport('k'), noSleep).evaluate({}, PRECHECK_V1)).rejects.toThrow(/not implemented/);
+    await expect(
+      createJevClient(new TypesafeJevTransport('k'), noSleep).evaluate({}, PRECHECK_V1),
+    ).rejects.toThrow(/not implemented/);
   });
 
   it('cloudflare adapter posts state+questions and unwraps the envelope', async () => {
     let captured: { url: string; body: unknown; auth: string | null } | null = null;
     const fetchMock = (async (url: string, init: RequestInit) => {
-      captured = { url, body: JSON.parse(String(init.body)), auth: new Headers(init.headers).get('authorization') };
+      captured = {
+        url,
+        body: JSON.parse(String(init.body)),
+        auth: new Headers(init.headers).get('authorization'),
+      };
       return new Response(
-        JSON.stringify({ success: true, result: { answers: { likely_impulse: { type: 'noul', noul: 0.2 } }, usage: { input_tokens: 120 } } }),
+        JSON.stringify({
+          success: true,
+          result: { answers: { likely_impulse: { type: 'noul', noul: 0.2 } }, usage: { input_tokens: 120 } },
+        }),
         { status: 200 },
       );
     }) as unknown as typeof fetch;
     const q = defineQuestions({ likely_impulse: PRECHECK_V1.likely_impulse });
-    const r = await createJevClient(new CloudflareJevTransport('acc', 'tok', fetchMock), noSleep).evaluate({ x: 1 }, q);
+    const r = await createJevClient(new CloudflareJevTransport('acc', 'tok', fetchMock), noSleep).evaluate(
+      { x: 1 },
+      q,
+    );
     expect(captured!.url).toBe('https://api.cloudflare.com/client/v4/accounts/acc/ai/run/typesafe/jev');
     expect(captured!.auth).toBe('Bearer tok');
     expect(captured!.body).toEqual({ state: { x: 1 }, questions: q });
@@ -119,7 +140,9 @@ describe('jev client', () => {
       n++;
       return new Response('{}', { status: 503 });
     }) as unknown as typeof fetch;
-    await expect(createJevClient(new CloudflareJevTransport('a', 't', fetchMock), noSleep).evaluate({}, PRECHECK_V1)).rejects.toThrow();
+    await expect(
+      createJevClient(new CloudflareJevTransport('a', 't', fetchMock), noSleep).evaluate({}, PRECHECK_V1),
+    ).rejects.toThrow();
     expect(n).toBe(3);
   });
 });
@@ -137,7 +160,10 @@ describe('uncertainty rule', () => {
 
   it('maps answers to stored labels with per-value uncertainty', async () => {
     const c = createJevClient(new FakeJevTransport(), noSleep);
-    const r = await c.evaluate({ pre_note: 'Missed it, chasing, need to make back the last loss' }, LABEL_QUESTIONS);
+    const r = await c.evaluate(
+      { pre_note: 'Missed it, chasing, need to make back the last loss' },
+      LABEL_QUESTIONS,
+    );
     const l = toNoteLabels(r.answers);
     expect(l.primary_driver.uncertain).toBe(true); // conflicting signals
     expect(l.version).toMatch(/note-v1/);

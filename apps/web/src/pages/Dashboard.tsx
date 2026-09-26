@@ -3,7 +3,18 @@ import { Link } from 'react-router';
 import { AlertOctagon, ListPlus, ShieldCheck, Wallet } from 'lucide-react';
 import { useActiveAccount } from '../components/AccountSwitcher';
 import { RULE_TEXT, StatusBadge } from '../components/StatusBadge';
-import { Button, Card, EmptyState, ErrorBox, Kbd, Meter, PageHeader, Spinner, Stat } from '../components/ui';
+import {
+  Button,
+  Card,
+  Disclaimer,
+  EmptyState,
+  ErrorBox,
+  Kbd,
+  Meter,
+  PageHeader,
+  Spinner,
+  Stat,
+} from '../components/ui';
 import { RecentTrades } from '../components/RecentTrades';
 import { api } from '../lib/api';
 import { fmtMinutes, fmtMoney, fmtSignedMoney, signClass } from '../lib/format';
@@ -83,17 +94,30 @@ export function DashboardPage() {
               <div>
                 <div className="font-medium text-stop">{RULE_TEXT[e.breached.rule]} breached</div>
                 <div className="num text-fg-muted">
-                  Equity reached {fmtMoney(e.breached.equity, cur)} against a floor of {fmtMoney(e.breached.floor, cur)} (
-                  {new Date(e.breached.at).toLocaleString()}).
+                  Equity reached {fmtMoney(e.breached.equity, cur)} against a floor of{' '}
+                  {fmtMoney(e.breached.floor, cur)} ({new Date(e.breached.at).toLocaleString()}).
                 </div>
               </div>
             </div>
           )}
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            <Stat label="Balance" value={fmtMoney(e.balance, cur)} sub={<span className={signClass(e.balance - e.startingBalance)}>{fmtSignedMoney(e.balance - e.startingBalance, cur)} since start</span>} />
-            <div className="rounded-xl border border-line bg-surface px-4 py-3.5" title={`Target balance ${fmtMoney(e.profitTargetBalance, cur)}`}>
+            <Stat
+              label="Balance"
+              value={fmtMoney(e.balance, cur)}
+              sub={
+                <span className={signClass(e.balance - e.startingBalance)}>
+                  {fmtSignedMoney(e.balance - e.startingBalance, cur)} since start
+                </span>
+              }
+            />
+            <div
+              className="rounded-xl border border-line bg-surface px-4 py-3.5"
+              title={`Target balance ${fmtMoney(e.profitTargetBalance, cur)}`}
+            >
               <div className="text-[12px] font-medium text-fg-muted">Profit target</div>
-              <div className="num mt-1 text-[22px] leading-tight font-semibold">{Math.round(Math.max(0, e.profitProgress) * 100)}%</div>
+              <div className="num mt-1 text-[22px] leading-tight font-semibold">
+                {Math.round(Math.max(0, e.profitProgress) * 100)}%
+              </div>
               <div className="mt-2.5">
                 <Meter value={e.profitProgress} tone="go" label="Profit progress" />
               </div>
@@ -101,23 +125,44 @@ export function DashboardPage() {
                 {fmtMoney(Math.max(0, e.profitTargetBalance - e.balance), cur)} to go
               </div>
             </div>
-            <div className="rounded-xl border border-line bg-surface px-4 py-3.5" title={`Today's floor ${fmtMoney(e.dailyFloor, cur)} (from ${fmtMoney(e.dayStartReference, cur)} start-of-day minus ${fmtMoney(e.dailyLossLimit, cur)})`}>
+            <div
+              className="rounded-xl border border-line bg-surface px-4 py-3.5"
+              title={`Today's floor ${fmtMoney(e.dailyFloor, cur)} (from ${fmtMoney(e.dayStartReference, cur)} start-of-day minus ${fmtMoney(e.dailyLossLimit, cur)})`}
+            >
               <div className="text-[12px] font-medium text-fg-muted">Daily loss left today</div>
-              <div className={`num mt-1 text-[22px] leading-tight font-semibold ${e.dailyLossRemaining < e.dailyLossLimit * 0.3 ? 'text-caution' : ''}`}>
+              <div
+                className={`num mt-1 text-[22px] leading-tight font-semibold ${e.dailyLossRemaining < e.dailyLossLimit * 0.3 ? 'text-caution' : ''}`}
+              >
                 {fmtMoney(e.dailyLossRemaining, cur)}
               </div>
               <div className="mt-2.5">
-                <Meter value={e.dailyLossRemaining / e.dailyLossLimit} tone={e.dailyLossRemaining < e.dailyLossLimit * 0.3 ? 'caution' : 'accent'} label="Daily budget" />
+                <Meter
+                  value={e.dailyLossRemaining / e.dailyLossLimit}
+                  tone={e.dailyLossRemaining < e.dailyLossLimit * 0.3 ? 'caution' : 'accent'}
+                  label="Daily budget"
+                />
               </div>
-              <div className="num mt-1.5 text-xs text-fg-subtle">of {fmtMoney(e.dailyLossLimit, cur)} · floor {fmtMoney(e.dailyFloor, cur, 0)}</div>
+              <div className="num mt-1.5 text-xs text-fg-subtle">
+                of {fmtMoney(e.dailyLossLimit, cur)} · floor {fmtMoney(e.dailyFloor, cur, 0)}
+              </div>
             </div>
-            <div className="rounded-xl border border-line bg-surface px-4 py-3.5" title={`Max-loss floor ${fmtMoney(e.maxLossFloor, cur)}${account.rules.maxLossType !== 'static' ? `, high-water mark ${fmtMoney(e.highWaterMark, cur)}` : ''}`}>
+            <div
+              className="rounded-xl border border-line bg-surface px-4 py-3.5"
+              title={`Max-loss floor ${fmtMoney(e.maxLossFloor, cur)}${account.rules.maxLossType !== 'static' ? `, high-water mark ${fmtMoney(e.highWaterMark, cur)}` : ''}`}
+            >
               <div className="text-[12px] font-medium text-fg-muted">Distance to max-loss floor</div>
-              <div className="num mt-1 text-[22px] leading-tight font-semibold">{fmtMoney(e.distanceToMaxLoss, cur)}</div>
-              <div className="mt-2.5">
-                <Meter value={e.distanceToMaxLoss / ((e.startingBalance * account.rules.maxLossPct) / 100)} label="Max loss buffer" />
+              <div className="num mt-1 text-[22px] leading-tight font-semibold">
+                {fmtMoney(e.distanceToMaxLoss, cur)}
               </div>
-              <div className="num mt-1.5 text-xs text-fg-subtle">floor {fmtMoney(e.maxLossFloor, cur, 0)} · {account.rules.maxLossType.replace('_', ' ')}</div>
+              <div className="mt-2.5">
+                <Meter
+                  value={e.distanceToMaxLoss / ((e.startingBalance * account.rules.maxLossPct) / 100)}
+                  label="Max loss buffer"
+                />
+              </div>
+              <div className="num mt-1.5 text-xs text-fg-subtle">
+                floor {fmtMoney(e.maxLossFloor, cur, 0)} · {account.rules.maxLossType.replace('_', ' ')}
+              </div>
             </div>
           </div>
 
@@ -134,7 +179,10 @@ export function DashboardPage() {
                   value={`${t.consecutiveLossesToday}${tr.stopAfterLosses ? ` / ${tr.stopAfterLosses}` : ''}`}
                   warn={!!tr.stopAfterLosses && t.consecutiveLossesToday >= tr.stopAfterLosses}
                 />
-                <Row label="P&L today" value={<span className={signClass(t.pnlToday)}>{fmtSignedMoney(t.pnlToday, cur)}</span>} />
+                <Row
+                  label="P&L today"
+                  value={<span className={signClass(t.pnlToday)}>{fmtSignedMoney(t.pnlToday, cur)}</span>}
+                />
                 <Row
                   label="Since last loss"
                   value={fmtMinutes(t.minutesSinceLastLoss)}
@@ -155,6 +203,10 @@ export function DashboardPage() {
             </Card>
             <RecentTrades account={account} />
           </div>
+          <p className="text-xs text-fg-subtle">
+            Rule status uses closed trades only; open positions and floating P&L aren’t included.
+          </p>
+          <Disclaimer />
         </div>
       )}
     </>

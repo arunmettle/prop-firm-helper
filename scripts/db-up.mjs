@@ -30,7 +30,9 @@ async function waitForPort(host, port, timeoutMs) {
 if (hasDocker()) {
   execSync('docker compose up -d --wait db', { stdio: 'inherit' });
 } else {
-  console.log('[db-up] Docker not available — expecting a Postgres 16 server on localhost:5432 (see README).');
+  console.log(
+    '[db-up] Docker not available — expecting a Postgres 16 server on localhost:5432 (see README).',
+  );
 }
 const ok = await waitForPort('127.0.0.1', 5432, 30000);
 if (!ok) {

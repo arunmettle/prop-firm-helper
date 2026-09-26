@@ -14,7 +14,12 @@ afterAll(async () => env.close());
 
 describe('accounts', () => {
   it('creates, lists, updates and reports status', async () => {
-    const c = await env.app.inject({ method: 'POST', url: '/api/accounts', headers: { cookie: a }, payload: accountBody() });
+    const c = await env.app.inject({
+      method: 'POST',
+      url: '/api/accounts',
+      headers: { cookie: a },
+      payload: accountBody(),
+    });
     expect(c.statusCode).toBe(200);
     const id = c.json().id;
     const list = await env.app.inject({ url: '/api/accounts', headers: { cookie: a } });
@@ -45,12 +50,26 @@ describe('accounts', () => {
   it("user B cannot read, update or delete user A's account", async () => {
     const list = await env.app.inject({ url: '/api/accounts', headers: { cookie: a } });
     const id = list.json()[0].id;
-    expect((await env.app.inject({ url: `/api/accounts/${id}`, headers: { cookie: b } })).statusCode).toBe(404);
-    expect((await env.app.inject({ url: `/api/accounts/${id}/status`, headers: { cookie: b } })).statusCode).toBe(404);
+    expect((await env.app.inject({ url: `/api/accounts/${id}`, headers: { cookie: b } })).statusCode).toBe(
+      404,
+    );
     expect(
-      (await env.app.inject({ method: 'PUT', url: `/api/accounts/${id}`, headers: { cookie: b }, payload: accountBody() })).statusCode,
+      (await env.app.inject({ url: `/api/accounts/${id}/status`, headers: { cookie: b } })).statusCode,
     ).toBe(404);
-    expect((await env.app.inject({ method: 'DELETE', url: `/api/accounts/${id}`, headers: { cookie: b } })).statusCode).toBe(404);
+    expect(
+      (
+        await env.app.inject({
+          method: 'PUT',
+          url: `/api/accounts/${id}`,
+          headers: { cookie: b },
+          payload: accountBody(),
+        })
+      ).statusCode,
+    ).toBe(404);
+    expect(
+      (await env.app.inject({ method: 'DELETE', url: `/api/accounts/${id}`, headers: { cookie: b } }))
+        .statusCode,
+    ).toBe(404);
     expect((await env.app.inject({ url: '/api/accounts', headers: { cookie: b } })).json()).toHaveLength(0);
   });
 });

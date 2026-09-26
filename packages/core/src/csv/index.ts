@@ -73,8 +73,14 @@ export interface DroppedColumn {
 const SENSITIVE_HEADER: [RegExp, string][] = [
   [/e-?mail/i, 'looks like an email column'],
   [/pass(word)?|investor|pin\b|secret|token|api.?key/i, 'looks like a credential'],
-  [/\b(account|acct|acc)\b.*(no|num|number|id|#)?|^login$|login.?id|^account$/i, 'looks like an account number'],
-  [/(^|\s|_)(name|first.?name|last.?name|full.?name|client|trader|owner|holder)($|\s|_)/i, 'looks like a personal name'],
+  [
+    /\b(account|acct|acc)\b.*(no|num|number|id|#)?|^login$|login.?id|^account$/i,
+    'looks like an account number',
+  ],
+  [
+    /(^|\s|_)(name|first.?name|last.?name|full.?name|client|trader|owner|holder)($|\s|_)/i,
+    'looks like a personal name',
+  ],
   [/phone|mobile|address|iban|swift|bank|card/i, 'looks like personal or banking data'],
 ];
 
@@ -140,7 +146,8 @@ export function parseNumber(raw: string | undefined): number | null {
   if (!s) return null;
   if (/^\(.*\)$/.test(s)) s = '-' + s.slice(1, -1);
   // "1.234,56" → 1234.56 ; "1,234.56" → 1234.56
-  if (/,\d{1,2}$/.test(s) && s.includes('.') && s.indexOf('.') < s.lastIndexOf(',')) s = s.replace(/\./g, '').replace(',', '.');
+  if (/,\d{1,2}$/.test(s) && s.includes('.') && s.indexOf('.') < s.lastIndexOf(','))
+    s = s.replace(/\./g, '').replace(',', '.');
   else if (/^-?\d+,\d+$/.test(s)) s = s.replace(',', '.');
   else s = s.replace(/,/g, '');
   const n = Number(s);
@@ -164,12 +171,18 @@ export function parseCsvDate(raw: string | undefined, tz: string): string | null
   }
   let m = /^(\d{4})[-./](\d{1,2})[-./](\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/.exec(s);
   if (m) {
-    return zonedWallTimeToUtc({ y: +m[1]!, m: +m[2]!, d: +m[3]!, h: +(m[4] ?? 0), mi: +(m[5] ?? 0), s: +(m[6] ?? 0) }, tz).toISOString();
+    return zonedWallTimeToUtc(
+      { y: +m[1]!, m: +m[2]!, d: +m[3]!, h: +(m[4] ?? 0), mi: +(m[5] ?? 0), s: +(m[6] ?? 0) },
+      tz,
+    ).toISOString();
   }
   m = /^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/.exec(s);
   if (m) {
     // Day-first (DD/MM/YYYY) — the common broker-statement convention outside the US. See DECISIONS.md.
-    return zonedWallTimeToUtc({ y: +m[3]!, m: +m[2]!, d: +m[1]!, h: +(m[4] ?? 0), mi: +(m[5] ?? 0), s: +(m[6] ?? 0) }, tz).toISOString();
+    return zonedWallTimeToUtc(
+      { y: +m[3]!, m: +m[2]!, d: +m[1]!, h: +(m[4] ?? 0), mi: +(m[5] ?? 0), s: +(m[6] ?? 0) },
+      tz,
+    ).toISOString();
   }
   return null;
 }
@@ -204,7 +217,8 @@ export function mapCsvRow(
   // about initial risk, so we drop it rather than compute a wrong R. See RISKS.md.
   const dir = direction === 'long' ? 1 : -1;
   if (trade.stopPrice != null && (trade.stopPrice - trade.entryPrice) * dir >= 0) trade.stopPrice = null;
-  if (trade.targetPrice != null && (trade.targetPrice - trade.entryPrice) * dir <= 0) trade.targetPrice = null;
+  if (trade.targetPrice != null && (trade.targetPrice - trade.entryPrice) * dir <= 0)
+    trade.targetPrice = null;
   trade.exitType = suggestExitType({
     direction,
     entryPrice: trade.entryPrice,

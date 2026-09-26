@@ -43,7 +43,11 @@ export function EvidenceDrawer({
             <h2 className="mt-0.5 text-[15px] font-semibold">{title}</h2>
             <p className="mt-0.5 text-xs text-fg-muted">{ids.length} trades from your own history</p>
           </div>
-          <button onClick={onClose} className="rounded-md p-1.5 text-fg-muted hover:bg-surface-2 hover:text-fg" aria-label="Close">
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 text-fg-muted hover:bg-surface-2 hover:text-fg"
+            aria-label="Close"
+          >
             <X className="size-4" />
           </button>
         </header>

@@ -127,7 +127,9 @@ export class RuleEngine {
     const amount = (this.startingBalance * this.rules.maxLossPct) / 100;
     if (this.rules.maxLossType === 'static') return this.startingBalance - amount;
     const trailing = this.hwm - amount;
-    return this.rules.trailingLockAt === 'starting_balance' ? Math.min(trailing, this.startingBalance) : trailing;
+    return this.rules.trailingLockAt === 'starting_balance'
+      ? Math.min(trailing, this.startingBalance)
+      : trailing;
   }
 
   get profitTargetBalance(): number {
@@ -226,7 +228,13 @@ export class RuleEngine {
       passed: this.passed,
       passedAt: this.passedAt,
       timedOut: this.timedOut,
-      status: this.breached ? 'breached' : this.passed ? 'passed' : this.timedOut ? 'timed_out' : 'in_progress',
+      status: this.breached
+        ? 'breached'
+        : this.passed
+          ? 'passed'
+          : this.timedOut
+            ? 'timed_out'
+            : 'in_progress',
     };
   }
 }

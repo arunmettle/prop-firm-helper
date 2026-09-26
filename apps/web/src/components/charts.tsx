@@ -7,7 +7,11 @@ const MID = 'var(--color-viz-mid)';
 const axis = { fill: 'var(--color-fg-subtle)', fontSize: 11 };
 
 function TooltipBox({ children }: { children: ReactNode }) {
-  return <div className="rounded-lg border border-line-strong bg-surface-2 px-3 py-2 text-xs shadow-xl">{children}</div>;
+  return (
+    <div className="rounded-lg border border-line-strong bg-surface-2 px-3 py-2 text-xs shadow-xl">
+      {children}
+    </div>
+  );
 }
 
 /** R-multiple histogram. Diverging: orange = losing bins, gray = around zero, blue = winning bins. */
@@ -19,7 +23,13 @@ export function RDistributionChart({ data }: { data: { bin: string; n: number }[
       <ResponsiveContainer>
         <BarChart data={data} margin={{ top: 8, right: 4, bottom: 0, left: -18 }} barCategoryGap={6}>
           <CartesianGrid vertical={false} stroke="var(--color-viz-grid)" />
-          <XAxis dataKey="bin" tick={axis} tickLine={false} axisLine={{ stroke: 'var(--color-line-strong)' }} interval={0} />
+          <XAxis
+            dataKey="bin"
+            tick={axis}
+            tickLine={false}
+            axisLine={{ stroke: 'var(--color-line-strong)' }}
+            interval={0}
+          />
           <YAxis tick={axis} tickLine={false} axisLine={false} allowDecimals={false} width={40} />
           <Tooltip
             cursor={{ fill: 'rgba(255,255,255,0.04)' }}
@@ -28,7 +38,8 @@ export function RDistributionChart({ data }: { data: { bin: string; n: number }[
                 <TooltipBox>
                   <div className="font-medium text-fg">{payload[0].payload.bin}</div>
                   <div className="num text-fg-muted">
-                    {payload[0].payload.n} trades · {total ? Math.round((payload[0].payload.n / total) * 100) : 0}%
+                    {payload[0].payload.n} trades ·{' '}
+                    {total ? Math.round((payload[0].payload.n / total) * 100) : 0}%
                   </div>
                 </TooltipBox>
               ) : null
@@ -55,7 +66,15 @@ export interface GroupDatum {
 }
 
 /** Horizontal bars of a signed value (avg R / net R), one per group, with n on every row. */
-export function SignedBars({ data, unit = 'R', onSelect }: { data: GroupDatum[]; unit?: string; onSelect?: (key: string) => void }) {
+export function SignedBars({
+  data,
+  unit = 'R',
+  onSelect,
+}: {
+  data: GroupDatum[];
+  unit?: string;
+  onSelect?: (key: string) => void;
+}) {
   const max = Math.max(0.5, ...data.map((d) => Math.abs(d.value ?? 0)));
   return (
     <div className="space-y-1.5">
@@ -68,7 +87,11 @@ export function SignedBars({ data, unit = 'R', onSelect }: { data: GroupDatum[];
             type="button"
             onClick={() => onSelect?.(d.key)}
             className="group grid w-full grid-cols-[120px_1fr_120px] items-center gap-3 rounded-md px-1 py-1 text-left hover:bg-surface-2/60"
-            title={d.enough ? `${d.label}: ${v >= 0 ? '+' : '−'}${Math.abs(v).toFixed(2)}${unit} over ${d.n} trades` : `Not enough data yet (n=${d.n})`}
+            title={
+              d.enough
+                ? `${d.label}: ${v >= 0 ? '+' : '−'}${Math.abs(v).toFixed(2)}${unit} over ${d.n} trades`
+                : `Not enough data yet (n=${d.n})`
+            }
           >
             <span className="truncate text-[13px] text-fg-muted group-hover:text-fg">{d.label}</span>
             <span className="relative h-5">
@@ -86,7 +109,10 @@ export function SignedBars({ data, unit = 'R', onSelect }: { data: GroupDatum[];
               {!d.enough && (
                 <span
                   className="absolute top-1 left-[35%] h-3 w-[30%] rounded-[3px] border border-dashed border-line-strong"
-                  style={{ background: 'repeating-linear-gradient(45deg, transparent 0 4px, rgba(255,255,255,0.05) 4px 6px)' }}
+                  style={{
+                    background:
+                      'repeating-linear-gradient(45deg, transparent 0 4px, rgba(255,255,255,0.05) 4px 6px)',
+                  }}
                 />
               )}
             </span>

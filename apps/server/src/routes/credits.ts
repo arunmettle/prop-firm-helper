@@ -24,7 +24,12 @@ export async function creditRoutes(app: FastifyInstance, ctx: AppCtx) {
   app.get('/api/credits', pre, async (req) => {
     const user = currentUser(req);
     const ledger = await ctx.db
-      .select({ id: creditsLedger.id, delta: creditsLedger.delta, reason: creditsLedger.reason, createdAt: creditsLedger.createdAt })
+      .select({
+        id: creditsLedger.id,
+        delta: creditsLedger.delta,
+        reason: creditsLedger.reason,
+        createdAt: creditsLedger.createdAt,
+      })
       .from(creditsLedger)
       .where(eq(creditsLedger.userId, user.id))
       .orderBy(desc(creditsLedger.createdAt))
@@ -33,31 +38,43 @@ export async function creditRoutes(app: FastifyInstance, ctx: AppCtx) {
       balance: await balanceOf(ctx.db, user.id),
       ledger,
       paymentsEnabled: ctx.cfg.payments.enabled,
-      packs: ctx.cfg.payments.enabled ? ctx.cfg.payments.packs.map((p) => ({ id: p.id, credits: p.credits, label: p.label ?? `${p.credits} credits` })) : [],
+      packs: ctx.cfg.payments.enabled
+        ? ctx.cfg.payments.packs.map((p) => ({
+            id: p.id,
+            credits: p.credits,
+            label: p.label ?? `${p.credits} credits`,
+          }))
+        : [],
     };
   });
 
-  app.post('/api/credits/checkout', { ...pre, config: { rateLimit: { max: 10, timeWindow: '1 minute' } } }, async (req) => {
-    const user = currentUser(req);
-    const stripe = stripeClient(ctx);
-    if (!stripe) throw new HttpError(404, 'Payments are not enabled.');
-    const { packId } = parse(z.object({ packId: z.string().max(60) }), req.body);
-    const pack = ctx.cfg.payments.packs.find((p) => p.id === packId);
-    if (!pack) throw new HttpError(400, 'Unknown credit pack');
-    const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
-      line_items: [{ price: pack.priceId, quantity: 1 }],
-      client_reference_id: user.id,
-      metadata: { userId: user.id, packId: pack.id },
-      success_url: `${ctx.cfg.appUrl}/credits?status=success`,
-      cancel_url: `${ctx.cfg.appUrl}/credits?status=cancelled`,
-    });
-    return { url: session.url };
-  });
+  app.post(
+    '/api/credits/checkout',
+    { ...pre, config: { rateLimit: { max: 10, timeWindow: '1 minute' } } },
+    async (req) => {
+      const user = currentUser(req);
+      const stripe = stripeClient(ctx);
+      if (!stripe) throw new HttpError(404, 'Payments are not enabled.');
+      const { packId } = parse(z.object({ packId: z.string().max(60) }), req.body);
+      const pack = ctx.cfg.payments.packs.find((p) => p.id === packId);
+      if (!pack) throw new HttpError(400, 'Unknown credit pack');
+      const session = await stripe.checkout.sessions.create({
+        mode: 'payment',
+        line_items: [{ price: pack.priceId, quantity: 1 }],
+        client_reference_id: user.id,
+        metadata: { userId: user.id, packId: pack.id },
+        success_url: `${ctx.cfg.appUrl}/credits?status=success`,
+        cancel_url: `${ctx.cfg.appUrl}/credits?status=cancelled`,
+      });
+      return { url: session.url };
+    },
+  );
 
   // Webhook: raw body for signature verification, encapsulated so JSON parsing elsewhere is unaffected.
   await app.register(async (scope) => {
-    scope.addContentTypeParser('application/json', { parseAs: 'buffer' }, (_req, body, done) => done(null, body));
+    scope.addContentTypeParser('application/json', { parseAs: 'buffer' }, (_req, body, done) =>
+      done(null, body),
+    );
     scope.post('/api/stripe/webhook', async (req, reply) => {
       if (!ctx.cfg.payments.enabled) return reply.status(404).send({ error: 'Not found' });
       const sig = req.headers['stripe-signature'];

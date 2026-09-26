@@ -43,6 +43,8 @@ export function todayStats(trades: MinimalTrade[], tz: string, now: Date = new D
     consecutiveLosses: count(closed),
     pnlToday: closedToday.reduce((s, t) => s + (t.pnl ?? 0), 0),
     lastLossAt,
-    minutesSinceLastLoss: lastLossAt ? Math.floor((now.getTime() - new Date(lastLossAt).getTime()) / 60_000) : null,
+    minutesSinceLastLoss: lastLossAt
+      ? Math.floor((now.getTime() - new Date(lastLossAt).getTime()) / 60_000)
+      : null,
   };
 }

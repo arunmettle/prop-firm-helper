@@ -14,7 +14,13 @@ import {
 } from './types.js';
 import { dayKey } from '../time.js';
 
-const zero = (): Record<BehaviourDim, number> => ({ sizeUp: 0, extraTrade: 0, skipValid: 0, earlyClose: 0, widenStop: 0 });
+const zero = (): Record<BehaviourDim, number> => ({
+  sizeUp: 0,
+  extraTrade: 0,
+  skipValid: 0,
+  earlyClose: 0,
+  widenStop: 0,
+});
 
 /**
  * Bucket each historical trade by the state it was taken in (losses in a row × today's P&L band) and count how
@@ -32,11 +38,12 @@ export function buildConditionalProbs(
   const counts = new Map<string, Record<BehaviourDim, number>>();
   const opps = new Map<string, Record<BehaviourDim, number>>();
   const ns = new Map<string, number>();
-  for (const l of LOSS_BUCKETS) for (const b of PNL_BANDS) {
-    counts.set(key(l, b), zero());
-    opps.set(key(l, b), zero());
-    ns.set(key(l, b), 0);
-  }
+  for (const l of LOSS_BUCKETS)
+    for (const b of PNL_BANDS) {
+      counts.set(key(l, b), zero());
+      opps.set(key(l, b), zero());
+      ns.set(key(l, b), 0);
+    }
   for (const t of et) {
     const k = key(t.losses, t.band);
     const c = counts.get(k)!;
@@ -70,10 +77,11 @@ export function buildConditionalProbs(
 
   const total = zero();
   const totalOpp = zero();
-  for (const k of counts.keys()) for (const d of BEHAVIOUR_DIMENSIONS) {
-    total[d] += counts.get(k)![d];
-    totalOpp[d] += opps.get(k)![d];
-  }
+  for (const k of counts.keys())
+    for (const d of BEHAVIOUR_DIMENSIONS) {
+      total[d] += counts.get(k)![d];
+      totalOpp[d] += opps.get(k)![d];
+    }
   const global: DimProbs = zero();
   for (const d of BEHAVIOUR_DIMENSIONS) global[d] = totalOpp[d] ? total[d] / totalOpp[d] : 0;
 
@@ -89,34 +97,50 @@ export function buildConditionalProbs(
   };
 
   const buckets: BucketProbs[] = [];
-  for (const l of LOSS_BUCKETS) for (const b of PNL_BANDS) {
-    const k = key(l, b);
-    const c = counts.get(k)!;
-    const o = opps.get(k)!;
-    const raw = zero();
-    const smoothed = zero();
-    let lowData = false;
-    for (const d of BEHAVIOUR_DIMENSIONS) {
-      raw[d] = o[d] ? c[d] / o[d] : 0;
-      if (o[d] >= MIN_BUCKET_N) {
-        smoothed[d] = raw[d];
-        continue;
+  for (const l of LOSS_BUCKETS)
+    for (const b of PNL_BANDS) {
+      const k = key(l, b);
+      const c = counts.get(k)!;
+      const o = opps.get(k)!;
+      const raw = zero();
+      const smoothed = zero();
+      let lowData = false;
+      for (const d of BEHAVIOUR_DIMENSIONS) {
+        raw[d] = o[d] ? c[d] / o[d] : 0;
+        if (o[d] >= MIN_BUCKET_N) {
+          smoothed[d] = raw[d];
+          continue;
+        }
+        lowData = true;
+        // Blend: pad this bucket up to MIN_BUCKET_N pseudo-observations from its neighbours (or global if they're empty).
+        let nc = 0;
+        let no = 0;
+        for (const nk of neighbours(l, b)) {
+          nc += counts.get(nk)![d];
+          no += opps.get(nk)![d];
+        }
+        const prior = no > 0 ? nc / no : global[d];
+        const k0 = MIN_BUCKET_N - o[d];
+        smoothed[d] = (c[d] + k0 * prior) / (o[d] + k0);
       }
-      lowData = true;
-      // Blend: pad this bucket up to MIN_BUCKET_N pseudo-observations from its neighbours (or global if they're empty).
-      let nc = 0;
-      let no = 0;
-      for (const nk of neighbours(l, b)) {
-        nc += counts.get(nk)![d];
-        no += opps.get(nk)![d];
-      }
-      const prior = no > 0 ? nc / no : global[d];
-      const k0 = MIN_BUCKET_N - o[d];
-      smoothed[d] = (c[d] + k0 * prior) / (o[d] + k0);
+      buckets.push({
+        losses: l,
+        band: b,
+        n: ns.get(k)!,
+        counts: c,
+        opportunities: o,
+        raw,
+        smoothed,
+        lowData,
+      });
     }
-    buckets.push({ losses: l, band: b, n: ns.get(k)!, counts: c, opportunities: o, raw, smoothed, lowData });
-  }
-  const evidence: Record<BehaviourDim, string[]> = { sizeUp: [], extraTrade: [], skipValid: [], earlyClose: [], widenStop: [] };
+  const evidence: Record<BehaviourDim, string[]> = {
+    sizeUp: [],
+    extraTrade: [],
+    skipValid: [],
+    earlyClose: [],
+    widenStop: [],
+  };
   const upMultiples: number[] = [];
   for (const t of et) {
     const bh = beh.get(t.id)!;

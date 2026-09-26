@@ -251,9 +251,15 @@ describe('max loss: trailing end-of-day', () => {
     expect(r.maxLossFloor).toBe(S);
   });
   it('with lock "never" the floor keeps trailing', () => {
-    const r = evaluateAccount(eod({ profitTargetPct: 30, trailingLockAt: 'never' }), S, [tr(1, 8000), tr(2, 7000)], null, {
-      asOf: '2026-07-03T09:00:00Z',
-    });
+    const r = evaluateAccount(
+      eod({ profitTargetPct: 30, trailingLockAt: 'never' }),
+      S,
+      [tr(1, 8000), tr(2, 7000)],
+      null,
+      {
+        asOf: '2026-07-03T09:00:00Z',
+      },
+    );
     expect(r.maxLossFloor).toBe(105_000);
   });
   it('locked floor still breaches when balance drops below the starting balance', () => {
@@ -264,7 +270,8 @@ describe('max loss: trailing end-of-day', () => {
 });
 
 describe('max loss: trailing intraday', () => {
-  const intra = (o: Partial<Rules> = {}) => base({ maxLossType: 'trailing_intraday', maxDailyLossPct: 20, ...o });
+  const intra = (o: Partial<Rules> = {}) =>
+    base({ maxLossType: 'trailing_intraday', maxDailyLossPct: 20, ...o });
   it('floor trails immediately after a winning trade', () => {
     const r = evaluateAccount(intra(), S, [tr(1, 4000)]);
     expect(r.maxLossFloor).toBe(94_000);
@@ -331,11 +338,15 @@ describe('calendar-day limit', () => {
     expect(r.calendarDaysElapsed).toBe(30);
   });
   it('asOf past the window times out an idle account', () => {
-    const r = evaluateAccount(base({ maxCalendarDays: 5 }), S, [tr(1, 100)], null, { asOf: '2026-07-10T09:00:00Z' });
+    const r = evaluateAccount(base({ maxCalendarDays: 5 }), S, [tr(1, 100)], null, {
+      asOf: '2026-07-10T09:00:00Z',
+    });
     expect(r.status).toBe('timed_out');
   });
   it('startDate option anchors the window', () => {
-    const r = evaluateAccount(base({ maxCalendarDays: 5 }), S, [tr(10, 100)], null, { startDate: '2026-07-01T00:00:00Z' });
+    const r = evaluateAccount(base({ maxCalendarDays: 5 }), S, [tr(10, 100)], null, {
+      startDate: '2026-07-01T00:00:00Z',
+    });
     expect(r.timedOut).toBe(true);
   });
 });
@@ -397,7 +408,9 @@ describe('engine: pessimistic intraday checks', () => {
 describe('input validation', () => {
   it('rejects a trade that closes before it opens', () => {
     expect(() =>
-      evaluateAccount(base(), S, [{ openedAt: '2026-07-02T00:00:00Z', closedAt: '2026-07-01T00:00:00Z', pnl: 1 }]),
+      evaluateAccount(base(), S, [
+        { openedAt: '2026-07-02T00:00:00Z', closedAt: '2026-07-01T00:00:00Z', pnl: 1 },
+      ]),
     ).toThrow();
   });
   it('rejects a non-finite pnl', () => {

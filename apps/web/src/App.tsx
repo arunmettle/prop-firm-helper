@@ -2,6 +2,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router';
 import { useMe } from './lib/hooks';
 import { Layout } from './components/Layout';
 import { Spinner } from './components/ui';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { LoginPage } from './pages/Login';
 import { VerifyPage } from './pages/Verify';
 import { DashboardPage } from './pages/Dashboard';
@@ -15,6 +16,7 @@ import { InsightsPage } from './pages/Insights';
 import { PrecheckPage } from './pages/Precheck';
 import { SimulatorPage } from './pages/Simulator';
 import { CreditsPage } from './pages/Credits';
+import { SettingsPage } from './pages/Settings';
 
 export function App() {
   const me = useMe();
@@ -24,21 +26,24 @@ export function App() {
   if (!me.data) return <LoginPage />;
   return (
     <Layout me={me.data}>
-      <Routes>
-        <Route path="/" element={<DashboardPage />} />
-        <Route path="/accounts" element={<AccountsPage />} />
-        <Route path="/trades" element={<TradesPage />} />
-        <Route path="/trades/new" element={<TradeFormPage key="new" />} />
-        <Route path="/trades/:id" element={<TradeFormPage />} />
-        <Route path="/import" element={<ImportPage />} />
-        <Route path="/admin" element={<AdminPage />} />
-        <Route path="/insights" element={<InsightsPage />} />
-        <Route path="/check" element={<PrecheckPage />} />
-        <Route path="/simulate" element={<SimulatorPage />} />
-        <Route path="/credits" element={<CreditsPage />} />
-        <Route path="/accounts/:id" element={<AccountFormPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <ErrorBoundary key={loc.pathname}>
+        <Routes>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/accounts" element={<AccountsPage />} />
+          <Route path="/trades" element={<TradesPage />} />
+          <Route path="/trades/new" element={<TradeFormPage key="new" />} />
+          <Route path="/trades/:id" element={<TradeFormPage />} />
+          <Route path="/import" element={<ImportPage />} />
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/insights" element={<InsightsPage />} />
+          <Route path="/check" element={<PrecheckPage />} />
+          <Route path="/simulate" element={<SimulatorPage />} />
+          <Route path="/credits" element={<CreditsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/accounts/:id" element={<AccountFormPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </ErrorBoundary>
     </Layout>
   );
 }

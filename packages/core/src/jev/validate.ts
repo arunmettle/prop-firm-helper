@@ -19,7 +19,11 @@ function schemaFor(q: Questions[string]): z.ZodType {
     case 'score':
       return z.object({
         type: z.literal('score').optional(),
-        score: z.number().int().min(0).max(q.criteria.length - 1),
+        score: z
+          .number()
+          .int()
+          .min(0)
+          .max(q.criteria.length - 1),
         confidence: prob,
         legend: z.unknown().optional(),
         probabilities: z.unknown().optional(),

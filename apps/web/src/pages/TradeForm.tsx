@@ -77,10 +77,17 @@ export function TradeFormPage() {
   const formRef = useRef<HTMLFormElement>(null);
   const sizeRef = useRef<HTMLInputElement>(null);
 
-  const existing = useQuery({ queryKey: ['trade', id], queryFn: () => api.get<TradeDto>(`/api/trades/${id}`), enabled: !isNew });
+  const existing = useQuery({
+    queryKey: ['trade', id],
+    queryFn: () => api.get<TradeDto>(`/api/trades/${id}`),
+    enabled: !isNew,
+  });
   const precheck = useQuery({
     queryKey: ['precheck', precheckId],
-    queryFn: () => api.get<{ input: Record<string, unknown>; computed: { positionSizeLots: number | null } }>(`/api/prechecks/${precheckId}`),
+    queryFn: () =>
+      api.get<{ input: Record<string, unknown>; computed: { positionSizeLots: number | null } }>(
+        `/api/prechecks/${precheckId}`,
+      ),
     enabled: isNew && !!precheckId,
   });
   const tags = useQuery({
@@ -117,7 +124,15 @@ export function TradeFormPage() {
   useEffect(() => {
     const p = precheck.data;
     if (!p) return;
-    const i = p.input as { instrument: string; direction: 'long' | 'short'; entry: number; stop: number; target: number | null; setupTag: string | null; preNote: string };
+    const i = p.input as {
+      instrument: string;
+      direction: 'long' | 'short';
+      entry: number;
+      stop: number;
+      target: number | null;
+      setupTag: string | null;
+      preNote: string;
+    };
     setF((s) => ({
       ...s,
       instrument: i.instrument,
@@ -143,7 +158,13 @@ export function TradeFormPage() {
     exitPrice: n(f.exitPrice),
     closedAt: f.closed ? f.closedAt : null,
   });
-  const exitType: ExitType = f.closed ? (f.exitTouched && f.exitType !== 'open' ? f.exitType : suggested === 'open' ? 'manual_close' : suggested) : 'open';
+  const exitType: ExitType = f.closed
+    ? f.exitTouched && f.exitType !== 'open'
+      ? f.exitType
+      : suggested === 'open'
+        ? 'manual_close'
+        : suggested
+    : 'open';
 
   const math = useMemo(() => {
     if (!account || n(f.entryPrice) === null || n(f.sizeLots) === null) return null;
@@ -246,17 +267,31 @@ export function TradeFormPage() {
   if (!account) return <Spinner />;
   if (!isNew && existing.isLoading) return <Spinner />;
   const cur = account.currency;
-  const set = <K extends keyof F>(k: K) => (v: F[K]) => setF((s) => ({ ...s, [k]: v }));
+  const set =
+    <K extends keyof F>(k: K) =>
+    (v: F[K]) =>
+      setF((s) => ({ ...s, [k]: v }));
 
   return (
     <form ref={formRef} onSubmit={submit}>
       <PageHeader
         title={isNew ? 'Log trade' : 'Edit trade'}
-        description={isNew ? (precheckId ? 'Pre-filled from your pre-trade check.' : 'A few fields and one honest line. Under 10 seconds.') : undefined}
+        description={
+          isNew
+            ? precheckId
+              ? 'Pre-filled from your pre-trade check.'
+              : 'A few fields and one honest line. Under 10 seconds.'
+            : undefined
+        }
         actions={
           <>
             {!isNew && (
-              <Button type="button" variant="ghost" icon={<Trash2 className="size-4" />} onClick={() => confirm('Delete this trade?') && del.mutate()}>
+              <Button
+                type="button"
+                variant="ghost"
+                icon={<Trash2 className="size-4" />}
+                onClick={() => confirm('Delete this trade?') && del.mutate()}
+              >
                 Delete
               </Button>
             )}
@@ -269,7 +304,11 @@ export function TradeFormPage() {
           </>
         }
       />
-      {formError && <p className="mb-4 rounded-lg border border-stop/30 bg-stop-soft px-3 py-2 text-sm text-stop">{formError}</p>}
+      {formError && (
+        <p className="mb-4 rounded-lg border border-stop/30 bg-stop-soft px-3 py-2 text-sm text-stop">
+          {formError}
+        </p>
+      )}
       <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
         <div className="space-y-5">
           <Card>
@@ -283,42 +322,91 @@ export function TradeFormPage() {
                       onClick={() => set('direction')(d)}
                       className={clsx(
                         'flex h-8 items-center justify-center gap-1.5 rounded-md text-sm font-medium capitalize transition-colors',
-                        f.direction === d ? (d === 'long' ? 'bg-go-soft text-go' : 'bg-stop-soft text-stop') : 'text-fg-muted hover:text-fg',
+                        f.direction === d
+                          ? d === 'long'
+                            ? 'bg-go-soft text-go'
+                            : 'bg-stop-soft text-stop'
+                          : 'text-fg-muted hover:text-fg',
                       )}
                     >
-                      {d === 'long' ? <ArrowUpRight className="size-4" /> : <ArrowDownRight className="size-4" />}
+                      {d === 'long' ? (
+                        <ArrowUpRight className="size-4" />
+                      ) : (
+                        <ArrowDownRight className="size-4" />
+                      )}
                       {d}
                     </button>
                   ))}
                 </div>
               </Field>
               <Field label="Instrument" className="col-span-2">
-                <Input value={f.instrument} onChange={(e) => set('instrument')(e.target.value.toUpperCase())} />
+                <Input
+                  value={f.instrument}
+                  onChange={(e) => set('instrument')(e.target.value.toUpperCase())}
+                />
               </Field>
               <Field label="Size (lots)" error={errors.sizeLots} className="col-span-2">
-                <Input ref={sizeRef} type="number" step="any" min="0" value={f.sizeLots} onChange={(e) => set('sizeLots')(e.target.value)} invalid={!!errors.sizeLots} />
+                <Input
+                  ref={sizeRef}
+                  type="number"
+                  step="any"
+                  min="0"
+                  value={f.sizeLots}
+                  onChange={(e) => set('sizeLots')(e.target.value)}
+                  invalid={!!errors.sizeLots}
+                />
               </Field>
               <Field label="Entry" error={errors.entryPrice} className="col-span-2">
-                <Input type="number" step="any" value={f.entryPrice} onChange={(e) => set('entryPrice')(e.target.value)} invalid={!!errors.entryPrice} />
+                <Input
+                  type="number"
+                  step="any"
+                  value={f.entryPrice}
+                  onChange={(e) => set('entryPrice')(e.target.value)}
+                  invalid={!!errors.entryPrice}
+                />
               </Field>
               <Field label="Stop" error={errors.stopPrice} className="col-span-2">
-                <Input type="number" step="any" value={f.stopPrice} onChange={(e) => set('stopPrice')(e.target.value)} invalid={!!errors.stopPrice} />
+                <Input
+                  type="number"
+                  step="any"
+                  value={f.stopPrice}
+                  onChange={(e) => set('stopPrice')(e.target.value)}
+                  invalid={!!errors.stopPrice}
+                />
               </Field>
               <Field label="Target (optional)" error={errors.targetPrice} className="col-span-2">
-                <Input type="number" step="any" value={f.targetPrice} onChange={(e) => set('targetPrice')(e.target.value)} />
+                <Input
+                  type="number"
+                  step="any"
+                  value={f.targetPrice}
+                  onChange={(e) => set('targetPrice')(e.target.value)}
+                />
               </Field>
               <Field label="Opened at" error={errors.openedAt} className="col-span-2">
-                <Input type="datetime-local" value={f.openedAt} onChange={(e) => set('openedAt')(e.target.value)} />
+                <Input
+                  type="datetime-local"
+                  value={f.openedAt}
+                  onChange={(e) => set('openedAt')(e.target.value)}
+                />
               </Field>
               <Field label="Setup" className="col-span-4" hint="Your own label. Autocompletes from history.">
-                <Input list="setup-tags" value={f.setupTag} onChange={(e) => set('setupTag')(e.target.value)} placeholder="e.g. breakout" />
+                <Input
+                  list="setup-tags"
+                  value={f.setupTag}
+                  onChange={(e) => set('setupTag')(e.target.value)}
+                  placeholder="e.g. breakout"
+                />
                 <datalist id="setup-tags">
                   {[...new Set([...(tags.data ?? []), ...account.traderRules.setups])].map((t) => (
                     <option key={t} value={t} />
                   ))}
                 </datalist>
               </Field>
-              <Field label="Why this trade, in one line?" error={errors.preNote} className="col-span-2 md:col-span-6">
+              <Field
+                label="Why this trade, in one line?"
+                error={errors.preNote}
+                className="col-span-2 md:col-span-6"
+              >
                 <Input
                   value={f.preNote}
                   onChange={(e) => set('preNote')(e.target.value)}
@@ -333,7 +421,12 @@ export function TradeFormPage() {
           <Card
             title={
               <label className="flex cursor-pointer items-center gap-2.5">
-                <input type="checkbox" className="size-4 accent-[var(--color-accent)]" checked={f.closed} onChange={(e) => set('closed')(e.target.checked)} />
+                <input
+                  type="checkbox"
+                  className="size-4 accent-[var(--color-accent)]"
+                  checked={f.closed}
+                  onChange={(e) => set('closed')(e.target.checked)}
+                />
                 Trade is closed
               </label>
             }
@@ -341,15 +434,26 @@ export function TradeFormPage() {
           >
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               <Field label="Closed at" error={errors.closedAt}>
-                <Input type="datetime-local" value={f.closedAt} onChange={(e) => set('closedAt')(e.target.value)} />
+                <Input
+                  type="datetime-local"
+                  value={f.closedAt}
+                  onChange={(e) => set('closedAt')(e.target.value)}
+                />
               </Field>
               <Field label="Exit price" error={errors.exitPrice}>
-                <Input type="number" step="any" value={f.exitPrice} onChange={(e) => set('exitPrice')(e.target.value)} />
+                <Input
+                  type="number"
+                  step="any"
+                  value={f.exitPrice}
+                  onChange={(e) => set('exitPrice')(e.target.value)}
+                />
               </Field>
               <Field label="How it closed" error={errors.exitType}>
                 <Select
                   value={exitType}
-                  onChange={(e) => setF((s) => ({ ...s, exitType: e.target.value as ExitType, exitTouched: true }))}
+                  onChange={(e) =>
+                    setF((s) => ({ ...s, exitType: e.target.value as ExitType, exitTouched: true }))
+                  }
                 >
                   {(['target', 'stop', 'manual_close', 'breakeven'] as const).map((x) => (
                     <option key={x} value={x}>
@@ -367,7 +471,12 @@ export function TradeFormPage() {
           <Card
             title={
               <label className="flex cursor-pointer items-center gap-2.5">
-                <input type="checkbox" className="size-4 accent-[var(--color-caution)]" checked={f.overrideFlag} onChange={(e) => set('overrideFlag')(e.target.checked)} />
+                <input
+                  type="checkbox"
+                  className="size-4 accent-[var(--color-caution)]"
+                  checked={f.overrideFlag}
+                  onChange={(e) => set('overrideFlag')(e.target.checked)}
+                />
                 I changed my plan during this trade
               </label>
             }
@@ -382,7 +491,9 @@ export function TradeFormPage() {
                   onClick={() => set('overrideKind')(k)}
                   className={clsx(
                     'h-8 rounded-lg border px-3 text-sm transition-colors',
-                    f.overrideKind === k ? 'border-caution/50 bg-caution-soft text-caution' : 'border-line-strong text-fg-muted hover:text-fg',
+                    f.overrideKind === k
+                      ? 'border-caution/50 bg-caution-soft text-caution'
+                      : 'border-line-strong text-fg-muted hover:text-fg',
                   )}
                 >
                   {OVERRIDE_LABELS[k]}
@@ -390,7 +501,13 @@ export function TradeFormPage() {
               ))}
             </div>
             {errors.overrideKind && <p className="mt-2 text-xs text-stop">{errors.overrideKind}</p>}
-            <Textarea className="mt-4 min-h-16" placeholder="What made you change it? (optional)" value={f.overrideNote} onChange={(e) => set('overrideNote')(e.target.value)} maxLength={500} />
+            <Textarea
+              className="mt-4 min-h-16"
+              placeholder="What made you change it? (optional)"
+              value={f.overrideNote}
+              onChange={(e) => set('overrideNote')(e.target.value)}
+              maxLength={500}
+            />
           </Card>
         </div>
 
@@ -403,18 +520,29 @@ export function TradeFormPage() {
               </div>
               <div className="flex justify-between">
                 <dt className="text-fg-muted">Risk % of starting balance</dt>
-                <dd className="num font-medium">{math?.riskAmount != null ? `${((math.riskAmount / account.startingBalance) * 100).toFixed(2)}%` : '—'}</dd>
+                <dd className="num font-medium">
+                  {math?.riskAmount != null
+                    ? `${((math.riskAmount / account.startingBalance) * 100).toFixed(2)}%`
+                    : '—'}
+                </dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-fg-muted">Reward : risk</dt>
-                <dd className="num font-medium">{rr != null && Number.isFinite(rr) ? `${rr.toFixed(2)} : 1` : '—'}</dd>
+                <dd className="num font-medium">
+                  {rr != null && Number.isFinite(rr) ? `${rr.toFixed(2)} : 1` : '—'}
+                </dd>
               </div>
               {f.closed && (
                 <>
                   <div className="my-2 border-t border-line" />
                   <div className="flex justify-between">
                     <dt className="text-fg-muted">P&L</dt>
-                    <dd className={clsx('num font-semibold', (math?.pnl ?? 0) > 0 ? 'text-go' : (math?.pnl ?? 0) < 0 ? 'text-stop' : '')}>
+                    <dd
+                      className={clsx(
+                        'num font-semibold',
+                        (math?.pnl ?? 0) > 0 ? 'text-go' : (math?.pnl ?? 0) < 0 ? 'text-stop' : '',
+                      )}
+                    >
                       {fmtMoney(math?.pnl, cur)}
                     </dd>
                   </div>
@@ -425,7 +553,11 @@ export function TradeFormPage() {
                 </>
               )}
             </dl>
-            {math?.formula && <p className="mt-4 border-t border-line pt-3 text-[11px] leading-relaxed text-fg-subtle">{math.formula}</p>}
+            {math?.formula && (
+              <p className="mt-4 border-t border-line pt-3 text-[11px] leading-relaxed text-fg-subtle">
+                {math.formula}
+              </p>
+            )}
             {math?.warnings.map((w) => (
               <p key={w} className="mt-2 text-[11px] text-caution">
                 {w}

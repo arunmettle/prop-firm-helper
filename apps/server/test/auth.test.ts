@@ -32,7 +32,11 @@ describe('health + auth', () => {
   });
 
   it('a magic link can be used only once', async () => {
-    await env.app.inject({ method: 'POST', url: '/api/auth/request', payload: { email: 'once@example.com' } });
+    await env.app.inject({
+      method: 'POST',
+      url: '/api/auth/request',
+      payload: { email: 'once@example.com' },
+    });
     const token = new URL(/https?:\/\/\S+/.exec(env.email.sent.at(-1)!.text)![0]).searchParams.get('token')!;
     const a = await env.app.inject({ method: 'POST', url: '/api/auth/verify', payload: { token } });
     const b = await env.app.inject({ method: 'POST', url: '/api/auth/verify', payload: { token } });
@@ -41,7 +45,11 @@ describe('health + auth', () => {
   });
 
   it('session cookie is httpOnly and SameSite=Lax', async () => {
-    await env.app.inject({ method: 'POST', url: '/api/auth/request', payload: { email: 'cookie@example.com' } });
+    await env.app.inject({
+      method: 'POST',
+      url: '/api/auth/request',
+      payload: { email: 'cookie@example.com' },
+    });
     const token = new URL(/https?:\/\/\S+/.exec(env.email.sent.at(-1)!.text)![0]).searchParams.get('token')!;
     const r = await env.app.inject({ method: 'POST', url: '/api/auth/verify', payload: { token } });
     const c = String(r.headers['set-cookie']);

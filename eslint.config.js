@@ -4,7 +4,15 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import globals from 'globals';
 
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/node_modules/**', 'apps/server/drizzle/**', 'playwright-report/**', 'test-results/**'] },
+  {
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      'apps/server/drizzle/**',
+      'playwright-report/**',
+      'test-results/**',
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
@@ -20,7 +28,7 @@ export default tseslint.config(
     rules: { 'react-hooks/rules-of-hooks': 'error', 'react-hooks/exhaustive-deps': 'warn' },
   },
   {
-    files: ['scripts/**', '**/*.config.{js,ts}', 'e2e/**'],
+    files: ['scripts/**', '**/*.config.{js,ts}', 'e2e/**', '**/test/**'],
     rules: { 'no-console': 'off' },
     languageOptions: { globals: globals.node },
   },

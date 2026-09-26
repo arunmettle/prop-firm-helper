@@ -44,7 +44,9 @@ export function enrich(trades: BTrade[], ctx: BehaviourContext, sizeBasis: 'risk
       if (prior[i]!.pnl < 0) streak++;
       else break;
     }
-    const dayPnlBefore = prior.filter((p) => dayKey(p.close, ctx.timezone) === day).reduce((s, p) => s + p.pnl, 0);
+    const dayPnlBefore = prior
+      .filter((p) => dayKey(p.close, ctx.timezone) === day)
+      .reduce((s, p) => s + p.pnl, 0);
     const lastLoss = [...prior].reverse().find((p) => p.pnl < 0);
     const prev = prior.at(-1);
     const idx = perDayCount.get(day) ?? 0;
@@ -81,12 +83,17 @@ const TILT_DRIVERS = new Set(['fomo', 'revenge', 'greed', 'boredom']);
  * Decide whether a historical trade was plan vs tilt, and which behaviours it shows.
  * Jev labels decide when present and certain; otherwise transparent heuristics are used (and counted as such).
  */
-export function classifyBehaviour(t: EnrichedTrade, ctx: BehaviourContext, baseline: number | null): TradeBehaviour {
+export function classifyBehaviour(
+  t: EnrichedTrade,
+  ctx: BehaviourContext,
+  baseline: number | null,
+): TradeBehaviour {
   const soonAfterLoss = t.minutesSinceLoss !== null && t.minutesSinceLoss <= ctx.cooldownMinutes;
   const beyondMax = ctx.maxTradesPerDay !== null && t.indexToday >= ctx.maxTradesPerDay;
   const bigger = baseline !== null && baseline > 0 && t.size > 1.3 * baseline;
   const l = t.noteLabels;
-  const justified = l?.override_justified && !l.override_justified.uncertain && l.override_justified.p >= 0.65;
+  const justified =
+    l?.override_justified && !l.override_justified.uncertain && l.override_justified.p >= 0.65;
   let tilt: boolean;
   let source: 'jev' | 'heuristic';
   if (l && !l.tilt_behaviour.uncertain) {
@@ -97,19 +104,24 @@ export function classifyBehaviour(t: EnrichedTrade, ctx: BehaviourContext, basel
       (soonAfterLoss && t.streakBefore > 0) ||
       beyondMax ||
       (bigger && t.streakBefore > 0) ||
-      (t.overrideFlag && !justified && (t.overrideKind === 'moved_stop' || t.overrideKind === 'removed_stop' || t.overrideKind === 'added_size'));
+      (t.overrideFlag &&
+        !justified &&
+        (t.overrideKind === 'moved_stop' ||
+          t.overrideKind === 'removed_stop' ||
+          t.overrideKind === 'added_size'));
     source = 'heuristic';
   }
   const driver = l && !l.primary_driver.uncertain ? l.primary_driver.value : null;
   const earlyClose =
-    (t.overrideKind === 'closed_early' && !justified) ||
-    (t.exitType === 'manual_close' && driver === 'fear');
+    (t.overrideKind === 'closed_early' && !justified) || (t.exitType === 'manual_close' && driver === 'fear');
   const widenStop = (t.overrideKind === 'moved_stop' || t.overrideKind === 'removed_stop') && !justified;
   return {
     tilt,
     source,
     sizeUp: tilt && bigger,
-    extraTrade: tilt && (beyondMax || soonAfterLoss || (driver !== null && TILT_DRIVERS.has(driver) && driver !== 'greed')),
+    extraTrade:
+      tilt &&
+      (beyondMax || soonAfterLoss || (driver !== null && TILT_DRIVERS.has(driver) && driver !== 'greed')),
     earlyClose,
     widenStop,
   };

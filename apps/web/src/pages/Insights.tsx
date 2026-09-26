@@ -14,13 +14,30 @@ import {
 } from '@cooldown/core';
 import { api } from '../lib/api';
 import { useActiveAccount } from '../components/AccountSwitcher';
-import { Badge, Button, Card, Disclaimer, EmptyState, ErrorBox, Gated, PageHeader, Segmented, Spinner, Stat } from '../components/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  Disclaimer,
+  EmptyState,
+  ErrorBox,
+  Gated,
+  PageHeader,
+  Segmented,
+  Spinner,
+  Stat,
+} from '../components/ui';
 import { RDistributionChart, SignedBars, type GroupDatum } from '../components/charts';
 import { EvidenceDrawer } from '../components/Evidence';
 import { fmtMoney, fmtPct, fmtR } from '../lib/format';
 import { cn } from '../lib/cn';
 
-const SESSION_LABEL: Record<string, string> = { asia: 'Asia', london: 'London', ny: 'New York', off: 'Off-hours' };
+const SESSION_LABEL: Record<string, string> = {
+  asia: 'Asia',
+  london: 'London',
+  ny: 'New York',
+  off: 'Off-hours',
+};
 const DRIVER_LABEL: Record<string, string> = {
   plan: 'Plan',
   fomo: 'FOMO',
@@ -30,9 +47,20 @@ const DRIVER_LABEL: Record<string, string> = {
   boredom: 'Boredom',
   unclear: 'Unclear',
 };
-const BAND_LABEL: Record<string, string> = { up: 'Day up', flat: 'Day flat', down_lt50: 'Down < ½ limit', down_ge50: 'Down ≥ ½ limit' };
+const BAND_LABEL: Record<string, string> = {
+  up: 'Day up',
+  flat: 'Day flat',
+  down_lt50: 'Down < ½ limit',
+  down_ge50: 'Down ≥ ½ limit',
+};
 
-const toDatum = (g: GroupStat, label = g.key): GroupDatum => ({ key: g.key, label, value: g.avgR, n: g.n, enough: g.nR >= MIN_N });
+const toDatum = (g: GroupStat, label = g.key): GroupDatum => ({
+  key: g.key,
+  label,
+  value: g.avgR,
+  n: g.n,
+  enough: g.nR >= MIN_N,
+});
 
 export function InsightsPage() {
   const { account } = useActiveAccount();
@@ -41,7 +69,8 @@ export function InsightsPage() {
   const [dim, setDim] = useState<BehaviourDim>('sizeUp');
   const q = useQuery({
     queryKey: ['profile', account?.id],
-    queryFn: () => api.get<{ profile: BehaviourProfile; labelsPending: number }>(`/api/profile?accountId=${account!.id}`),
+    queryFn: () =>
+      api.get<{ profile: BehaviourProfile; labelsPending: number }>(`/api/profile?accountId=${account!.id}`),
     enabled: !!account,
     refetchInterval: (query) => (query.state.data?.labelsPending ? 3000 : false),
   });
@@ -62,12 +91,17 @@ export function InsightsPage() {
           title="Your profile builds from closed trades"
           action={
             <div className="flex gap-2">
-              <Link to="/trades/new"><Button variant="primary">Log a trade</Button></Link>
-              <Link to="/import"><Button>Import history</Button></Link>
+              <Link to="/trades/new">
+                <Button variant="primary">Log a trade</Button>
+              </Link>
+              <Link to="/import">
+                <Button>Import history</Button>
+              </Link>
             </div>
           }
         >
-          Once you have about 10 closed trades, patterns start to show — what you do after losses, which setups and sessions work for you.
+          Once you have about 10 closed trades, patterns start to show — what you do after losses, which
+          setups and sessions work for you.
         </EmptyState>
       </>
     );
@@ -78,7 +112,8 @@ export function InsightsPage() {
       : breakdown === 'session'
         ? m.bySession.map((g) => toDatum(g, SESSION_LABEL[g.key] ?? g.key))
         : m.byWeekday.map((g) => toDatum(g));
-  const breakdownGroups = breakdown === 'setup' ? m.bySetup : breakdown === 'session' ? m.bySession : m.byWeekday;
+  const breakdownGroups =
+    breakdown === 'setup' ? m.bySetup : breakdown === 'session' ? m.bySession : m.byWeekday;
 
   return (
     <>
@@ -97,25 +132,41 @@ export function InsightsPage() {
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Stat label="Closed trades" value={p.tradeCount} sub={`${m.tradesPerDay.days} trading days`} />
-        <Stat label="Win rate" value={<Gated n={m.overall.n}>{fmtPct(m.overall.winRate)}</Gated>} sub={`n=${m.overall.n}`} />
+        <Stat
+          label="Win rate"
+          value={<Gated n={m.overall.n}>{fmtPct(m.overall.winRate)}</Gated>}
+          sub={`n=${m.overall.n}`}
+        />
         <Stat
           label="Expectancy (avg R)"
           value={<Gated n={m.overall.nR}>{fmtR(m.overall.avgR)}</Gated>}
           sub={`n=${m.overall.nR} trades with a stop`}
           title="Average R-multiple per trade = sum of R / number of trades with a defined risk"
         />
-        <Stat label="Net P&L" value={fmtMoney(m.overall.netPnl, cur, 0)} sub={`${fmtMoney(m.overall.expectancyMoney, cur)} per trade`} />
+        <Stat
+          label="Net P&L"
+          value={fmtMoney(m.overall.netPnl, cur, 0)}
+          sub={`${fmtMoney(m.overall.expectancyMoney, cur)} per trade`}
+        />
       </div>
 
       {p.insights.length > 0 && (
-        <Card className="mt-5" title="What stands out" subtitle="Only patterns with at least 10 trades behind them">
+        <Card
+          className="mt-5"
+          title="What stands out"
+          subtitle="Only patterns with at least 10 trades behind them"
+        >
           <ul className="divide-y divide-line">
             {p.insights.map((i) => (
               <li key={i.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
                 <span
                   className={cn(
                     'grid size-8 shrink-0 place-items-center rounded-lg',
-                    i.tone === 'caution' ? 'bg-caution-soft text-caution' : i.tone === 'positive' ? 'bg-go-soft text-go' : 'bg-surface-3 text-fg-muted',
+                    i.tone === 'caution'
+                      ? 'bg-caution-soft text-caution'
+                      : i.tone === 'positive'
+                        ? 'bg-go-soft text-go'
+                        : 'bg-surface-3 text-fg-muted',
                   )}
                 >
                   <Lightbulb className="size-4" />
@@ -156,10 +207,14 @@ export function InsightsPage() {
             data={breakdownData}
             onSelect={(k) => {
               const g = breakdownGroups.find((x) => x.key === k);
-              if (g) show(`${breakdown === 'session' ? SESSION_LABEL[k] ?? k : k} trades`, g.tradeIds);
+              if (g) show(`${breakdown === 'session' ? (SESSION_LABEL[k] ?? k) : k} trades`, g.tradeIds);
             }}
           />
-          {breakdown === 'session' && <p className="mt-3 text-[11px] text-fg-subtle">Sessions by UTC hour: Asia 00–07, London 07–12, New York 12–21.</p>}
+          {breakdown === 'session' && (
+            <p className="mt-3 text-[11px] text-fg-subtle">
+              Sessions by UTC hour: Asia 00–07, London 07–12, New York 12–21.
+            </p>
+          )}
         </Card>
       </div>
 
@@ -175,35 +230,65 @@ export function InsightsPage() {
         />
         <CompareTile
           label="Minutes to next trade after a loss"
-          value={<Gated n={m.reentry.nAfterLoss}>{Math.round(m.reentry.medianMinutesAfterLoss ?? 0)} min</Gated>}
+          value={
+            <Gated n={m.reentry.nAfterLoss}>{Math.round(m.reentry.medianMinutesAfterLoss ?? 0)} min</Gated>
+          }
           sub={`after a win: ${m.reentry.medianMinutesAfterWin != null ? Math.round(m.reentry.medianMinutesAfterWin) + ' min' : '—'} · median, n=${m.reentry.nAfterLoss}`}
         />
         <CompareTile
           label={`Trades within ${m.soonAfterLoss.minutes} min of a loss`}
           value={<Gated n={m.soonAfterLoss.within.nR}>{fmtR(m.soonAfterLoss.within.avgR)}</Gated>}
           sub={`avg R vs ${fmtR(m.soonAfterLoss.others.avgR)} otherwise · n=${m.soonAfterLoss.within.n}`}
-          warn={m.soonAfterLoss.within.nR >= MIN_N && (m.soonAfterLoss.within.avgR ?? 0) < (m.soonAfterLoss.others.avgR ?? 0)}
-          onClick={() => show(`Trades within ${m.soonAfterLoss.minutes} min of a loss`, m.soonAfterLoss.within.tradeIds)}
+          warn={
+            m.soonAfterLoss.within.nR >= MIN_N &&
+            (m.soonAfterLoss.within.avgR ?? 0) < (m.soonAfterLoss.others.avgR ?? 0)
+          }
+          onClick={() =>
+            show(`Trades within ${m.soonAfterLoss.minutes} min of a loss`, m.soonAfterLoss.within.tradeIds)
+          }
         />
         <CompareTile
-          label={m.stopAfterLosses.rule ? `Stop after ${m.stopAfterLosses.rule} losses — kept` : 'Stop-after-losses rule'}
+          label={
+            m.stopAfterLosses.rule
+              ? `Stop after ${m.stopAfterLosses.rule} losses — kept`
+              : 'Stop-after-losses rule'
+          }
           value={
             m.stopAfterLosses.rule ? (
-              m.stopAfterLosses.daysReached ? `${fmtPct(m.stopAfterLosses.compliance)}` : <span className="text-sm font-normal text-fg-subtle">never reached</span>
+              m.stopAfterLosses.daysReached ? (
+                `${fmtPct(m.stopAfterLosses.compliance)}`
+              ) : (
+                <span className="text-sm font-normal text-fg-subtle">never reached</span>
+              )
             ) : (
               <span className="text-sm font-normal text-fg-subtle">no rule set</span>
             )
           }
           sub={`reached on ${m.stopAfterLosses.daysReached} days · later trades ${fmtR(m.stopAfterLosses.tradesAfterRule.netR)} net`}
           warn={(m.stopAfterLosses.compliance ?? 1) < 0.8}
-          onClick={m.stopAfterLosses.tradesAfterRule.n ? () => show('Trades taken after hitting your stop rule', m.stopAfterLosses.tradesAfterRule.tradeIds) : undefined}
+          onClick={
+            m.stopAfterLosses.tradesAfterRule.n
+              ? () =>
+                  show(
+                    'Trades taken after hitting your stop rule',
+                    m.stopAfterLosses.tradesAfterRule.tradeIds,
+                  )
+              : undefined
+          }
         />
       </div>
 
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
-        <Card title="Changing the plan mid-trade" subtitle={`${m.overrides.n} of ${p.tradeCount} trades (${fmtPct(m.overrides.rate)})`}>
+        <Card
+          title="Changing the plan mid-trade"
+          subtitle={`${m.overrides.n} of ${p.tradeCount} trades (${fmtPct(m.overrides.rate)})`}
+        >
           <div className="mb-4 grid grid-cols-2 gap-3">
-            <MiniStat label="Plan changed" g={m.overrides.overridden} onClick={() => show('Trades where you changed the plan', m.overrides.overridden.tradeIds)} />
+            <MiniStat
+              label="Plan changed"
+              g={m.overrides.overridden}
+              onClick={() => show('Trades where you changed the plan', m.overrides.overridden.tradeIds)}
+            />
             <MiniStat label="Left alone" g={m.overrides.notOverridden} />
           </div>
           {m.overrides.byKind.length > 0 ? (
@@ -225,16 +310,27 @@ export function InsightsPage() {
           {m.labels.byDriver.length ? (
             <SignedBars
               unit="R"
-              data={m.labels.byDriver.map((g) => ({ key: g.key, label: DRIVER_LABEL[g.key] ?? g.key, value: g.netR, n: g.n, enough: g.n >= MIN_N }))}
+              data={m.labels.byDriver.map((g) => ({
+                key: g.key,
+                label: DRIVER_LABEL[g.key] ?? g.key,
+                value: g.netR,
+                n: g.n,
+                enough: g.n >= MIN_N,
+              }))}
               onSelect={(k) => {
                 const g = m.labels.byDriver.find((x) => x.key === k);
                 if (g) show(`Trades where your note read as ${DRIVER_LABEL[k] ?? k}`, g.tradeIds);
               }}
             />
           ) : (
-            <p className="text-sm text-fg-muted">No labelled notes yet. Notes are classified in the background after you log or import trades.</p>
+            <p className="text-sm text-fg-muted">
+              No labelled notes yet. Notes are classified in the background after you log or import trades.
+            </p>
           )}
-          <p className="mt-3 text-[11px] text-fg-subtle">Net R per note category. Labels come from your own one-line notes; uncertain labels are counted separately.</p>
+          <p className="mt-3 text-[11px] text-fg-subtle">
+            Net R per note category. Labels come from your own one-line notes; uncertain labels are counted
+            separately.
+          </p>
         </Card>
       </div>
 
@@ -260,7 +356,12 @@ export function InsightsPage() {
         <Heatmap profile={p} dim={dim} />
       </Card>
 
-      <EvidenceDrawer title={evidence?.title ?? ''} ids={evidence?.ids ?? null} currency={cur} onClose={() => setEvidence(null)} />
+      <EvidenceDrawer
+        title={evidence?.title ?? ''}
+        ids={evidence?.ids ?? null}
+        currency={cur}
+        onClose={() => setEvidence(null)}
+      />
     </>
   );
 }
@@ -289,7 +390,9 @@ function CompareTile({
       className="rounded-xl border border-line bg-surface px-4 py-3.5 text-left transition-colors enabled:hover:border-line-strong enabled:hover:bg-surface-2/60"
     >
       <div className="text-[12px] font-medium text-fg-muted">{label}</div>
-      <div className={cn('num mt-1 text-[22px] leading-tight font-semibold', warn && 'text-caution')}>{value}</div>
+      <div className={cn('num mt-1 text-[22px] leading-tight font-semibold', warn && 'text-caution')}>
+        {value}
+      </div>
       <div className="mt-1 text-xs text-fg-subtle">{sub}</div>
     </button>
   );
@@ -297,7 +400,12 @@ function CompareTile({
 
 function MiniStat({ label, g, onClick }: { label: string; g: GroupStat; onClick?: () => void }) {
   return (
-    <button type="button" disabled={!onClick} onClick={onClick} className="rounded-lg bg-surface-2 px-3 py-2.5 text-left enabled:hover:bg-surface-3">
+    <button
+      type="button"
+      disabled={!onClick}
+      onClick={onClick}
+      className="rounded-lg bg-surface-2 px-3 py-2.5 text-left enabled:hover:bg-surface-3"
+    >
       <div className="text-xs text-fg-muted">{label}</div>
       <div className="num mt-0.5 text-lg font-semibold">
         <Gated n={g.nR}>{fmtR(g.avgR)}</Gated>
@@ -337,8 +445,13 @@ function Heatmap({ profile, dim }: { profile: BehaviourProfile; dim: BehaviourDi
                     className={cn('h-14 rounded-md', c.lowData && 'border border-dashed border-fg-subtle/50')}
                     style={{ background: `rgba(57,135,229,${0.06 + v * 0.8})` }}
                   >
-                    <div className={cn('num text-[13px] font-semibold', v > 0.45 ? 'text-white' : 'text-fg')}>{Math.round(v * 100)}%</div>
-                    <div className={cn('num text-[10px]', v > 0.45 ? 'text-white/80' : 'text-fg-subtle')}>n={opp}{c.lowData ? ' · low' : ''}</div>
+                    <div className={cn('num text-[13px] font-semibold', v > 0.45 ? 'text-white' : 'text-fg')}>
+                      {Math.round(v * 100)}%
+                    </div>
+                    <div className={cn('num text-[10px]', v > 0.45 ? 'text-white/80' : 'text-fg-subtle')}>
+                      n={opp}
+                      {c.lowData ? ' · low' : ''}
+                    </div>
                   </td>
                 );
               })}
@@ -346,7 +459,9 @@ function Heatmap({ profile, dim }: { profile: BehaviourProfile; dim: BehaviourDi
           ))}
         </tbody>
       </table>
-      <p className="mt-3 text-[11px] text-fg-subtle">Dashed cells have fewer than 8 observations and are blended with neighbouring situations.</p>
+      <p className="mt-3 text-[11px] text-fg-subtle">
+        Dashed cells have fewer than 8 observations and are blended with neighbouring situations.
+      </p>
     </div>
   );
 }

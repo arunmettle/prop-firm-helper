@@ -39,7 +39,14 @@ describe('position sizing', () => {
     expect(s.tooSmall).toBe(true);
   });
   it('validates stop side', () => {
-    const base = { accountId: '00000000-0000-4000-8000-000000000000', direction: 'long', entry: 2400, stop: 2410, riskPct: 1, preNote: 'test note' };
+    const base = {
+      accountId: '00000000-0000-4000-8000-000000000000',
+      direction: 'long',
+      entry: 2400,
+      stop: 2410,
+      riskPct: 1,
+      preNote: 'test note',
+    };
     expect(precheckInputSchema.safeParse(base).success).toBe(false);
     expect(precheckInputSchema.safeParse({ ...base, stop: 2390 }).success).toBe(true);
     expect(precheckInputSchema.safeParse({ ...base, stop: 2390, preNote: '' }).success).toBe(false);
@@ -57,7 +64,12 @@ const rules = ruleSchema.parse({
   dayResetTimezone: 'UTC',
   consistencyRulePct: null,
 });
-const tr = traderRulesSchema.parse({ riskPct: 1, maxTradesPerDay: 3, stopAfterLosses: 2, cooldownMinutes: 30 });
+const tr = traderRulesSchema.parse({
+  riskPct: 1,
+  maxTradesPerDay: 3,
+  stopAfterLosses: 2,
+  cooldownMinutes: 30,
+});
 const now = new Date('2026-07-02T15:00:00Z');
 const input = precheckInputSchema.parse({
   accountId: '00000000-0000-4000-8000-000000000000',
@@ -69,7 +81,10 @@ const input = precheckInputSchema.parse({
 });
 const noJev: PrecheckJevView = { status: 'ok' };
 
-function scenario(trades: { openedAt: string; closedAt: string; pnl: number }[], o: { jev?: PrecheckJevView; riskPct?: number; historyR?: number[] } = {}) {
+function scenario(
+  trades: { openedAt: string; closedAt: string; pnl: number }[],
+  o: { jev?: PrecheckJevView; riskPct?: number; historyR?: number[] } = {},
+) {
   const inp = { ...input, riskPct: o.riskPct ?? 1 };
   const e0 = evaluateAccount(rules, 100_000, trades, null, { asOf: now });
   const sizing = sizePosition(inp, e0.balance, pv, 'USD');
@@ -77,13 +92,39 @@ function scenario(trades: { openedAt: string; closedAt: string; pnl: number }[],
   const hist = o.historyR
     ? groupStat(
         'h',
-        o.historyR.map((r, i) => ({ id: `h${i}`, openedAt: now, closedAt: now, pnl: r * 1000, rMultiple: r, sizeLots: 1, riskAmount: 1000, setupTag: 'A', exitType: 'stop' as const, overrideFlag: false, overrideKind: null, noteLabels: null })),
+        o.historyR.map((r, i) => ({
+          id: `h${i}`,
+          openedAt: now,
+          closedAt: now,
+          pnl: r * 1000,
+          rMultiple: r,
+          sizeLots: 1,
+          riskAmount: 1000,
+          setupTag: 'A',
+          exitType: 'stop' as const,
+          overrideFlag: false,
+          overrideKind: null,
+          noteLabels: null,
+        })),
       )
     : null;
-  const c = buildComputed({ input: inp, evaluation: e, sizing, today: todayStats(trades, 'UTC', now), traderRules: tr, session: 'ny', history: hist, baselineRisk: 1000 });
+  const c = buildComputed({
+    input: inp,
+    evaluation: e,
+    sizing,
+    today: todayStats(trades, 'UTC', now),
+    traderRules: tr,
+    session: 'ny',
+    history: hist,
+    baselineRisk: 1000,
+  });
   return decideVerdict(c, o.jev ?? noJev, 'USD');
 }
-const t = (h: number, pnl: number) => ({ openedAt: `2026-07-02T${String(h).padStart(2, '0')}:00:00Z`, closedAt: `2026-07-02T${String(h).padStart(2, '0')}:20:00Z`, pnl });
+const t = (h: number, pnl: number) => ({
+  openedAt: `2026-07-02T${String(h).padStart(2, '0')}:00:00Z`,
+  closedAt: `2026-07-02T${String(h).padStart(2, '0')}:20:00Z`,
+  pnl,
+});
 
 describe('verdict', () => {
   it('go when nothing flags', () => {
@@ -107,15 +148,27 @@ describe('verdict', () => {
     expect(v.verdict).toBe('stop');
   });
   it('stop on confident high tilt; not on unconfident high tilt', () => {
-    const hi = scenario([], { jev: { status: 'ok', tilt_risk: { value: 'High', score: 2, confidence: 0.8, uncertain: false } } });
+    const hi = scenario([], {
+      jev: { status: 'ok', tilt_risk: { value: 'High', score: 2, confidence: 0.8, uncertain: false } },
+    });
     expect(hi.verdict).toBe('stop');
-    const unsure = scenario([], { jev: { status: 'ok', tilt_risk: { value: 'High', score: 2, confidence: 0.5, uncertain: true } } });
+    const unsure = scenario([], {
+      jev: { status: 'ok', tilt_risk: { value: 'High', score: 2, confidence: 0.5, uncertain: true } },
+    });
     expect(unsure.verdict).toBe('go');
   });
   it('caution on elevated tilt or likely impulse', () => {
-    expect(scenario([], { jev: { status: 'ok', tilt_risk: { value: 'Elevated', score: 1, confidence: 0.7, uncertain: false } } }).verdict).toBe('caution');
-    expect(scenario([], { jev: { status: 'ok', likely_impulse: { p: 0.65, uncertain: false } } }).verdict).toBe('caution');
-    expect(scenario([], { jev: { status: 'ok', likely_impulse: { p: 0.64, uncertain: true } } }).verdict).toBe('go');
+    expect(
+      scenario([], {
+        jev: { status: 'ok', tilt_risk: { value: 'Elevated', score: 1, confidence: 0.7, uncertain: false } },
+      }).verdict,
+    ).toBe('caution');
+    expect(
+      scenario([], { jev: { status: 'ok', likely_impulse: { p: 0.65, uncertain: false } } }).verdict,
+    ).toBe('caution');
+    expect(
+      scenario([], { jev: { status: 'ok', likely_impulse: { p: 0.64, uncertain: true } } }).verdict,
+    ).toBe('go');
   });
   it('caution when size is above baseline', () => {
     const v = scenario([], { riskPct: 2 });
@@ -137,7 +190,10 @@ describe('verdict', () => {
     expect(v.reasons.map((r) => r.code)).toContain('jev_failed');
   });
   it('reasons never talk about market direction', () => {
-    const v = scenario([t(8, -500), t(9, -500)], { jev: { status: 'ok', tilt_risk: { value: 'High', score: 2, confidence: 0.9, uncertain: false } } });
-    for (const r of v.reasons) expect(r.text).not.toMatch(/bullish|bearish|will (go|rise|fall)|profitable|good trade|bad trade/i);
+    const v = scenario([t(8, -500), t(9, -500)], {
+      jev: { status: 'ok', tilt_risk: { value: 'High', score: 2, confidence: 0.9, uncertain: false } },
+    });
+    for (const r of v.reasons)
+      expect(r.text).not.toMatch(/bullish|bearish|will (go|rise|fall)|profitable|good trade|bad trade/i);
   });
 });

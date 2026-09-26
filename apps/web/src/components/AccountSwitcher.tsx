@@ -10,7 +10,11 @@ export function useAccounts() {
 }
 
 /** Resolves the active account, falling back to the first active one. */
-export function useActiveAccount(): { account: AccountDto | null; accounts: AccountDto[]; isLoading: boolean } {
+export function useActiveAccount(): {
+  account: AccountDto | null;
+  accounts: AccountDto[];
+  isLoading: boolean;
+} {
   const { data, isLoading } = useAccounts();
   const [id, setId] = useActiveAccountId();
   const accounts = data ?? [];

@@ -13,7 +13,11 @@ export interface NoteLabels {
 }
 
 export const LABEL_QUESTIONS = { ...NOTE_CLASSIFIER_V1, ...BEHAVIOUR_V1 };
-export const LABEL_QUESTIONS_WITH_OVERRIDE = { ...NOTE_CLASSIFIER_V1, ...OVERRIDE_JUSTIFIED_V1, ...BEHAVIOUR_V1 };
+export const LABEL_QUESTIONS_WITH_OVERRIDE = {
+  ...NOTE_CLASSIFIER_V1,
+  ...OVERRIDE_JUSTIFIED_V1,
+  ...BEHAVIOUR_V1,
+};
 
 export function toNoteLabels(
   a: Answers<typeof LABEL_QUESTIONS> & Partial<Answers<typeof OVERRIDE_JUSTIFIED_V1>>,
@@ -21,7 +25,11 @@ export function toNoteLabels(
   const imp = a.impulsiveness;
   return {
     version: NOTE_LABELS_VERSION,
-    primary_driver: { value: a.primary_driver.choice, confidence: a.primary_driver.confidence, uncertain: isUncertain(a.primary_driver) },
+    primary_driver: {
+      value: a.primary_driver.choice,
+      confidence: a.primary_driver.confidence,
+      uncertain: isUncertain(a.primary_driver),
+    },
     followed_own_plan: { p: a.followed_own_plan.noul, uncertain: isUncertain(a.followed_own_plan) },
     impulsiveness: {
       value: NOTE_CLASSIFIER_V1.impulsiveness.criteria[imp.score] ?? String(imp.score),

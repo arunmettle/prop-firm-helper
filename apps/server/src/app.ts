@@ -14,6 +14,7 @@ import { profileRoutes } from './routes/profile.js';
 import { precheckRoutes } from './routes/prechecks.js';
 import { simulationRoutes } from './routes/simulations.js';
 import { creditRoutes } from './routes/credits.js';
+import { privacyRoutes } from './routes/privacy.js';
 
 export interface BuildOptions {
   logger?: boolean;
@@ -50,5 +51,6 @@ export async function buildApp(ctx: AppCtx, opts: BuildOptions = {}): Promise<Fa
   await precheckRoutes(app, ctx);
   await simulationRoutes(app, ctx);
   await creditRoutes(app, ctx);
+  await privacyRoutes(app, ctx);
   return app;
 }

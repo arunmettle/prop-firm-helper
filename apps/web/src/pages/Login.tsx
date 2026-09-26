@@ -59,7 +59,8 @@ export function LoginPage() {
             </ul>
           </div>
           <p className="flex items-center gap-2 text-xs text-fg-subtle">
-            <Lock className="size-3.5" /> We never ask for broker logins. Your trades are never pooled or used for training.
+            <Lock className="size-3.5" /> We never ask for broker logins. Your trades are never pooled or used
+            for training.
           </p>
         </div>
       </div>
@@ -88,14 +89,19 @@ export function LoginPage() {
                   Dev mode: open sign-in link <ArrowRight className="size-4" />
                 </a>
               )}
-              <button className="mt-6 text-sm text-fg-muted underline-offset-4 hover:underline" onClick={() => setState('idle')}>
+              <button
+                className="mt-6 text-sm text-fg-muted underline-offset-4 hover:underline"
+                onClick={() => setState('idle')}
+              >
                 Use a different email
               </button>
             </div>
           ) : (
             <form onSubmit={submit}>
               <h2 className="text-xl font-semibold tracking-tight">Sign in</h2>
-              <p className="mt-1.5 text-sm text-fg-muted">We’ll email you a one-time link. No password, only your email is stored.</p>
+              <p className="mt-1.5 text-sm text-fg-muted">
+                We’ll email you a one-time link. No password, only your email is stored.
+              </p>
               <div className="mt-6 space-y-3">
                 <Input
                   type="email"
@@ -108,7 +114,13 @@ export function LoginPage() {
                   aria-label="Email"
                 />
                 {error && <p className="text-xs text-stop">{error}</p>}
-                <Button type="submit" variant="primary" size="lg" className="w-full" loading={state === 'sending'}>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  className="w-full"
+                  loading={state === 'sending'}
+                >
                   Email me a sign-in link
                 </Button>
               </div>

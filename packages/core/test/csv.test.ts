@@ -1,9 +1,28 @@
 import { describe, expect, it } from 'vitest';
-import { detectSensitiveColumns, guessMapping, mapCsvRow, parseCsvDate, parseNumber, zonedWallTimeToUtc } from '../src/index.js';
+import {
+  detectSensitiveColumns,
+  guessMapping,
+  mapCsvRow,
+  parseCsvDate,
+  parseNumber,
+  zonedWallTimeToUtc,
+} from '../src/index.js';
 
 describe('csv helpers', () => {
   it('guesses an MT4-style mapping', () => {
-    const m = guessMapping(['Ticket', 'Open Time', 'Type', 'Size', 'Item', 'Price', 'S / L', 'T / P', 'Close Time', 'Close Price', 'Profit']);
+    const m = guessMapping([
+      'Ticket',
+      'Open Time',
+      'Type',
+      'Size',
+      'Item',
+      'Price',
+      'S / L',
+      'T / P',
+      'Close Time',
+      'Close Price',
+      'Profit',
+    ]);
     expect(m).toMatchObject({
       openedAt: 'Open Time',
       direction: 'Type',
@@ -19,10 +38,37 @@ describe('csv helpers', () => {
   });
 
   it('drops account numbers, names, emails and credentials', () => {
-    const headers = ['Account', 'Login ID', 'Name', 'Email', 'Investor password', 'Broker ref', 'Symbol', 'Profit'];
+    const headers = [
+      'Account',
+      'Login ID',
+      'Name',
+      'Email',
+      'Investor password',
+      'Broker ref',
+      'Symbol',
+      'Profit',
+    ];
     const rows = [
-      { Account: '51234567', 'Login ID': '51234567', Name: 'Jo Bloggs', Email: 'x@y.com', 'Investor password': 'p', 'Broker ref': '98765432', Symbol: 'XAUUSD', Profit: '10' },
-      { Account: '51234567', 'Login ID': '51234567', Name: 'Jo Bloggs', Email: 'x@y.com', 'Investor password': 'p', 'Broker ref': '98765432', Symbol: 'XAUUSD', Profit: '-5' },
+      {
+        Account: '51234567',
+        'Login ID': '51234567',
+        Name: 'Jo Bloggs',
+        Email: 'x@y.com',
+        'Investor password': 'p',
+        'Broker ref': '98765432',
+        Symbol: 'XAUUSD',
+        Profit: '10',
+      },
+      {
+        Account: '51234567',
+        'Login ID': '51234567',
+        Name: 'Jo Bloggs',
+        Email: 'x@y.com',
+        'Investor password': 'p',
+        'Broker ref': '98765432',
+        Symbol: 'XAUUSD',
+        Profit: '-5',
+      },
     ];
     const d = detectSensitiveColumns(headers, rows).map((x) => x.header);
     expect(d).toEqual(['Account', 'Login ID', 'Name', 'Email', 'Investor password', 'Broker ref']);
@@ -34,10 +80,13 @@ describe('csv helpers', () => {
   });
 
   it('keeps ordinary trade columns', () => {
-    const d = detectSensitiveColumns(['Ticket', 'Symbol', 'Volume'], [
-      { Ticket: '1001', Symbol: 'XAUUSD', Volume: '1' },
-      { Ticket: '1002', Symbol: 'XAUUSD', Volume: '1' },
-    ]);
+    const d = detectSensitiveColumns(
+      ['Ticket', 'Symbol', 'Volume'],
+      [
+        { Ticket: '1001', Symbol: 'XAUUSD', Volume: '1' },
+        { Ticket: '1002', Symbol: 'XAUUSD', Volume: '1' },
+      ],
+    );
     expect(d).toEqual([]);
   });
 
@@ -60,11 +109,26 @@ describe('csv helpers', () => {
   });
 
   it('zoned wall time handles DST', () => {
-    expect(zonedWallTimeToUtc({ y: 2026, m: 1, d: 15, h: 12 }, 'Europe/Prague').toISOString()).toBe('2026-01-15T11:00:00.000Z');
-    expect(zonedWallTimeToUtc({ y: 2026, m: 7, d: 15, h: 12 }, 'Europe/Prague').toISOString()).toBe('2026-07-15T10:00:00.000Z');
+    expect(zonedWallTimeToUtc({ y: 2026, m: 1, d: 15, h: 12 }, 'Europe/Prague').toISOString()).toBe(
+      '2026-01-15T11:00:00.000Z',
+    );
+    expect(zonedWallTimeToUtc({ y: 2026, m: 7, d: 15, h: 12 }, 'Europe/Prague').toISOString()).toBe(
+      '2026-07-15T10:00:00.000Z',
+    );
   });
 
-  const mapping = guessMapping(['Open Time', 'Type', 'Size', 'Item', 'Price', 'S / L', 'T / P', 'Close Time', 'Close Price', 'Profit']);
+  const mapping = guessMapping([
+    'Open Time',
+    'Type',
+    'Size',
+    'Item',
+    'Price',
+    'S / L',
+    'T / P',
+    'Close Time',
+    'Close Price',
+    'Profit',
+  ]);
   const opts = { timezone: 'UTC', defaultInstrument: 'XAUUSD' };
   const row = {
     'Open Time': '2026.07.01 10:00',
@@ -83,7 +147,13 @@ describe('csv helpers', () => {
     const r = mapCsvRow(row, mapping, opts);
     expect(r.ok).toBe(true);
     if (r.ok) {
-      expect(r.trade).toMatchObject({ instrument: 'XAUUSD', direction: 'long', sizeLots: 0.5, pnl: 1000, exitType: 'target' });
+      expect(r.trade).toMatchObject({
+        instrument: 'XAUUSD',
+        direction: 'long',
+        sizeLots: 0.5,
+        pnl: 1000,
+        exitType: 'target',
+      });
     }
   });
 

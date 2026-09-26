@@ -40,8 +40,16 @@ export async function adminRoutes(app: FastifyInstance, ctx: AppCtx) {
       .from(jobs);
     const [sims] = await ctx.db.select({ n: sql<number>`count(*)::int` }).from(simulationRuns);
     const [credits] = await ctx.db
-      .select({ sold: sql<number>`coalesce(sum(${creditsLedger.delta}) filter (where ${creditsLedger.reason} = 'purchase'), 0)::int` })
+      .select({
+        sold: sql<number>`coalesce(sum(${creditsLedger.delta}) filter (where ${creditsLedger.reason} = 'purchase'), 0)::int`,
+      })
       .from(creditsLedger);
-    return { provider: ctx.jev.provider, users: rows, jobs: q, simulations: sims?.n ?? 0, creditsSold: credits?.sold ?? 0 };
+    return {
+      provider: ctx.jev.provider,
+      users: rows,
+      jobs: q,
+      simulations: sims?.n ?? 0,
+      creditsSold: credits?.sold ?? 0,
+    };
   });
 }

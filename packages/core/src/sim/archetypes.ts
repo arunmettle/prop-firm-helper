@@ -73,7 +73,8 @@ export function archetypeProbs(a: Archetype): Record<string, DimProbs> {
     PNL_BANDS.forEach((b: PnlBand) => {
       const bump = b === 'down_ge50' ? 1.2 : b === 'down_lt50' ? 1.1 : 1;
       const p = {} as DimProbs;
-      for (const d of Object.keys(a.byLosses) as BehaviourDim[]) p[d] = Math.min(0.95, a.byLosses[d][li]! * bump);
+      for (const d of Object.keys(a.byLosses) as BehaviourDim[])
+        p[d] = Math.min(0.95, a.byLosses[d][li]! * bump);
       out[`${l}|${b}`] = p;
     });
   });

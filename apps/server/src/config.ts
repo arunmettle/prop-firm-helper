@@ -38,7 +38,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env) {
   // Default to the deterministic fake when no credentials are present.
   const jevProvider =
     e.JEV_PROVIDER ??
-    (e.CLOUDFLARE_API_TOKEN && e.CLOUDFLARE_ACCOUNT_ID ? 'cloudflare' : e.TYPESAFE_API_KEY ? 'typesafe' : 'fake');
+    (e.CLOUDFLARE_API_TOKEN && e.CLOUDFLARE_ACCOUNT_ID
+      ? 'cloudflare'
+      : e.TYPESAFE_API_KEY
+        ? 'typesafe'
+        : 'fake');
   let packs: CreditPack[] = [];
   if (e.STRIPE_CREDIT_PACKS) packs = JSON.parse(e.STRIPE_CREDIT_PACKS) as CreditPack[];
   return {

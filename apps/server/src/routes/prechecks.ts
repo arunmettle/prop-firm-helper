@@ -13,12 +13,16 @@ export async function precheckRoutes(app: FastifyInstance, ctx: AppCtx) {
   const pre = { preHandler: requireUser(ctx) };
 
   // Calls Jev → rate limited per client.
-  app.post('/api/prechecks', { ...pre, config: { rateLimit: { max: 30, timeWindow: '1 minute' } } }, async (req) => {
-    const user = currentUser(req);
-    const input = parse(precheckInputSchema, req.body);
-    const account = await ownedAccount(ctx.db, user.id, input.accountId);
-    return runPrecheck(ctx, user, account, input);
-  });
+  app.post(
+    '/api/prechecks',
+    { ...pre, config: { rateLimit: { max: 30, timeWindow: '1 minute' } } },
+    async (req) => {
+      const user = currentUser(req);
+      const input = parse(precheckInputSchema, req.body);
+      const account = await ownedAccount(ctx.db, user.id, input.accountId);
+      return runPrecheck(ctx, user, account, input);
+    },
+  );
 
   app.get('/api/prechecks', pre, async (req) => {
     const user = currentUser(req);

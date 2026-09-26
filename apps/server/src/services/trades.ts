@@ -2,7 +2,12 @@ import { computeTradeMath, normalizeSymbol, parseUserSettings, type TradeInput }
 import type { Account, NewTrade, Trade, User } from '../db/schema.js';
 
 /** Build the DB row for a trade: computes risk_amount, pnl and r_multiple from the inputs. */
-export function buildTradeRow(input: TradeInput, account: Account, user: User, source: 'manual' | 'csv' = 'manual') {
+export function buildTradeRow(
+  input: TradeInput,
+  account: Account,
+  user: User,
+  source: 'manual' | 'csv' = 'manual',
+) {
   const settings = parseUserSettings(user.settings);
   const math = computeTradeMath(
     {

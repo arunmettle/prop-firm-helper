@@ -15,7 +15,9 @@ export const fmtSignedMoney = (v: number | null | undefined, currency = 'USD'): 
 };
 
 export const fmtNum = (v: number | null | undefined, dp = 2): string =>
-  v == null || Number.isNaN(v) ? '—' : v.toLocaleString('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp });
+  v == null || Number.isNaN(v)
+    ? '—'
+    : v.toLocaleString('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp });
 
 export const fmtR = (v: number | null | undefined, dp = 2): string =>
   v == null ? '—' : `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toFixed(dp)}R`;

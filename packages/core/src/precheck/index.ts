@@ -22,9 +22,23 @@ export const precheckInputSchema = z
   .superRefine((t, ctx) => {
     const dir = t.direction === 'long' ? 1 : -1;
     if ((t.stop - t.entry) * dir >= 0)
-      ctx.addIssue({ code: 'custom', path: ['stop'], message: t.direction === 'long' ? 'Stop must be below entry for a long' : 'Stop must be above entry for a short' });
+      ctx.addIssue({
+        code: 'custom',
+        path: ['stop'],
+        message:
+          t.direction === 'long'
+            ? 'Stop must be below entry for a long'
+            : 'Stop must be above entry for a short',
+      });
     if (t.target !== null && (t.target - t.entry) * dir <= 0)
-      ctx.addIssue({ code: 'custom', path: ['target'], message: t.direction === 'long' ? 'Target must be above entry for a long' : 'Target must be below entry for a short' });
+      ctx.addIssue({
+        code: 'custom',
+        path: ['target'],
+        message:
+          t.direction === 'long'
+            ? 'Target must be above entry for a long'
+            : 'Target must be below entry for a short',
+      });
   });
 export type PrecheckInput = z.infer<typeof precheckInputSchema>;
 
@@ -136,22 +150,37 @@ export function buildComputed(args: {
     history: { setupTag: args.input.setupTag, session: args.session, stat: args.history },
     baselineRisk: args.baselineRisk,
     sizeAboveBaseline:
-      (args.baselineRisk !== null && sizing.actualRisk > 1.3 * args.baselineRisk) || args.input.riskPct > tr.riskPct * 1.3,
+      (args.baselineRisk !== null && sizing.actualRisk > 1.3 * args.baselineRisk) ||
+      args.input.riskPct > tr.riskPct * 1.3,
   };
 }
 
-const fmtMoney = (x: number, c: string) => `${x.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${c}`;
+const fmtMoney = (x: number, c: string) =>
+  `${x.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${c}`;
 
 /**
  * Verdict logic lives in code, not in the model. The model's answers only add caution/stop reasons when
  * they are confident; a failed model call never changes the verdict silently — it adds an info reason.
  * Reasons are about the trader's own rules and state, never about the market or the trade idea.
  */
-export function decideVerdict(c: PrecheckComputed, jev: PrecheckJevView, currency: string): { verdict: Verdict; reasons: Reason[] } {
+export function decideVerdict(
+  c: PrecheckComputed,
+  jev: PrecheckJevView,
+  currency: string,
+): { verdict: Verdict; reasons: Reason[] } {
   const reasons: Reason[] = [];
-  if (c.accountStatus === 'breached') reasons.push({ level: 'stop', code: 'account_breached', text: 'This account has already breached a rule.' });
+  if (c.accountStatus === 'breached')
+    reasons.push({
+      level: 'stop',
+      code: 'account_breached',
+      text: 'This account has already breached a rule.',
+    });
   if (c.sizing.tooSmall)
-    reasons.push({ level: 'stop', code: 'size_too_small', text: 'At this risk % and stop distance the position rounds down to zero lots.' });
+    reasons.push({
+      level: 'stop',
+      code: 'size_too_small',
+      text: 'At this risk % and stop distance the position rounds down to zero lots.',
+    });
   if (c.exceedsDailyBudget)
     reasons.push({
       level: 'stop',
@@ -171,24 +200,52 @@ export function decideVerdict(c: PrecheckComputed, jev: PrecheckJevView, currenc
       text: `You’ve had ${c.consecutiveLossesToday} losses in a row today — your rule is to stop after ${c.stopAfterLosses}.`,
     });
   if (c.maxTradesPerDay !== null && c.tradesToday >= c.maxTradesPerDay)
-    reasons.push({ level: 'stop', code: 'max_trades', text: `You’ve taken ${c.tradesToday} trades today — your limit is ${c.maxTradesPerDay}.` });
+    reasons.push({
+      level: 'stop',
+      code: 'max_trades',
+      text: `You’ve taken ${c.tradesToday} trades today — your limit is ${c.maxTradesPerDay}.`,
+    });
 
   if (jev.status === 'ok') {
     const t = jev.tilt_risk;
     if (t && t.score >= 2 && t.confidence >= 0.6)
-      reasons.push({ level: 'stop', code: 'tilt_high', text: 'The tilt check reads your current state as high risk. A short break usually costs nothing.' });
+      reasons.push({
+        level: 'stop',
+        code: 'tilt_high',
+        text: 'The tilt check reads your current state as high risk. A short break usually costs nothing.',
+      });
     else if (t && t.score === 1 && t.confidence >= 0.6)
-      reasons.push({ level: 'caution', code: 'tilt_elevated', text: 'The tilt check reads your current state as elevated.' });
+      reasons.push({
+        level: 'caution',
+        code: 'tilt_elevated',
+        text: 'The tilt check reads your current state as elevated.',
+      });
     if (jev.likely_impulse && jev.likely_impulse.p >= 0.65)
-      reasons.push({ level: 'caution', code: 'likely_impulse', text: 'Your note reads more like an impulse than a planned entry.' });
+      reasons.push({
+        level: 'caution',
+        code: 'likely_impulse',
+        text: 'Your note reads more like an impulse than a planned entry.',
+      });
     if (jev.matches_stated_setup && !jev.matches_stated_setup.uncertain && jev.matches_stated_setup.p <= 0.35)
-      reasons.push({ level: 'info', code: 'no_setup_match', text: 'Your note doesn’t clearly describe one of your own setups.' });
+      reasons.push({
+        level: 'info',
+        code: 'no_setup_match',
+        text: 'Your note doesn’t clearly describe one of your own setups.',
+      });
   } else if (jev.status === 'failed') {
-    reasons.push({ level: 'info', code: 'jev_failed', text: 'The tilt check couldn’t run right now — this verdict uses your own rules only.' });
+    reasons.push({
+      level: 'info',
+      code: 'jev_failed',
+      text: 'The tilt check couldn’t run right now — this verdict uses your own rules only.',
+    });
   }
 
   if (c.sizeAboveBaseline)
-    reasons.push({ level: 'caution', code: 'size_up', text: 'This is larger than your usual risk per trade.' });
+    reasons.push({
+      level: 'caution',
+      code: 'size_up',
+      text: 'This is larger than your usual risk per trade.',
+    });
   const h = c.history.stat;
   if (h && h.nR >= MIN_N && h.avgR !== null && h.avgR < 0)
     reasons.push({
@@ -203,7 +260,16 @@ export function decideVerdict(c: PrecheckComputed, jev: PrecheckJevView, currenc
       text: `Your last loss closed ${c.minutesSinceLastLoss} min ago (your cool-down is ${c.cooldownMinutes} min).`,
     });
 
-  const verdict: Verdict = reasons.some((r) => r.level === 'stop') ? 'stop' : reasons.some((r) => r.level === 'caution') ? 'caution' : 'go';
-  if (verdict === 'go') reasons.push({ level: 'info', code: 'clear', text: 'Nothing in your rules or recent state flags this trade.' });
+  const verdict: Verdict = reasons.some((r) => r.level === 'stop')
+    ? 'stop'
+    : reasons.some((r) => r.level === 'caution')
+      ? 'caution'
+      : 'go';
+  if (verdict === 'go')
+    reasons.push({
+      level: 'info',
+      code: 'clear',
+      text: 'Nothing in your rules or recent state flags this trade.',
+    });
   return { verdict, reasons };
 }

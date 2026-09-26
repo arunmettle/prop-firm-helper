@@ -112,7 +112,10 @@ const ZERO: DimProbs = { sizeUp: 0, extraTrade: 0, skipValid: 0, earlyClose: 0, 
  * seeded with (seed, i), and every run draws the same random numbers in the same order regardless of the
  * probabilities (common random numbers) — so scenario differences come from behaviour, not noise.
  */
-export function simulateScenario(cfg: Pick<SimConfig, 'rules' | 'startingBalance' | 'runs' | 'seed' | 'maxDays'>, sp: ScenarioParams): ScenarioResult {
+export function simulateScenario(
+  cfg: Pick<SimConfig, 'rules' | 'startingBalance' | 'runs' | 'seed' | 'maxDays'>,
+  sp: ScenarioParams,
+): ScenarioResult {
   const { rules, startingBalance: S } = cfg;
   const horizon = rules.maxCalendarDays ?? cfg.maxDays;
   const dailyLimit = (S * rules.maxDailyLossPct) / 100;
@@ -259,9 +262,30 @@ export function runSimulation(cfg: SimConfig, now: () => number = () => Date.now
   let reference: ScenarioParams;
 
   if (!illustrative) {
-    const pools = { planPool: m.planPool.length ? m.planPool : m.tiltPool, tiltPool: m.tiltPool, tradesPerDay: m.tradesPerDay };
-    scenarios.push(simulateScenario(cfg, { ...base, ...pools, id: 'perfect', label: 'Perfect discipline', kind: 'baseline', probs: null, tiltPool: [] }));
-    reference = { ...base, ...pools, id: 'measured', label: 'Your measured behaviour', kind: 'measured', probs: m.probs };
+    const pools = {
+      planPool: m.planPool.length ? m.planPool : m.tiltPool,
+      tiltPool: m.tiltPool,
+      tradesPerDay: m.tradesPerDay,
+    };
+    scenarios.push(
+      simulateScenario(cfg, {
+        ...base,
+        ...pools,
+        id: 'perfect',
+        label: 'Perfect discipline',
+        kind: 'baseline',
+        probs: null,
+        tiltPool: [],
+      }),
+    );
+    reference = {
+      ...base,
+      ...pools,
+      id: 'measured',
+      label: 'Your measured behaviour',
+      kind: 'measured',
+      probs: m.probs,
+    };
     scenarios.push(simulateScenario(cfg, reference));
   } else {
     const typical = ARCHETYPES.find((a) => a.id === 'typical')!;
@@ -296,7 +320,13 @@ export function runSimulation(cfg: SimConfig, now: () => number = () => Date.now
 
   const ranking: Finding[] = [];
   for (const d of BEHAVIOUR_DIMENSIONS) {
-    const s = simulateScenario(cfg, { ...reference!, id: `without_${d}`, label: DIM_TEXT[d].not, kind: 'sensitivity', zero: new Set([d]) });
+    const s = simulateScenario(cfg, {
+      ...reference!,
+      id: `without_${d}`,
+      label: DIM_TEXT[d].not,
+      kind: 'sensitivity',
+      zero: new Set([d]),
+    });
     scenarios.push(s);
     ranking.push({
       id: s.id,
@@ -314,15 +344,41 @@ export function runSimulation(cfg: SimConfig, now: () => number = () => Date.now
   const tr = cfg.trader;
   const stopValues = [1, 2, 3].filter((v) => v !== tr.stopAfterLosses);
   for (const v of stopValues) {
-    const s = simulateScenario(cfg, { ...reference!, id: `stop_after_${v}`, label: `Stop after ${v} loss${v > 1 ? 'es' : ''}`, kind: 'rule', trader: { ...tr, stopAfterLosses: v } });
+    const s = simulateScenario(cfg, {
+      ...reference!,
+      id: `stop_after_${v}`,
+      label: `Stop after ${v} loss${v > 1 ? 'es' : ''}`,
+      kind: 'rule',
+      trader: { ...tr, stopAfterLosses: v },
+    });
     scenarios.push(s);
     const cur = tr.stopAfterLosses ? `${tr.stopAfterLosses}` : 'no limit';
-    ruleSweeps.push({ id: s.id, label: s.label, from: ref.pass.p, to: s.pass.p, delta: s.pass.p - ref.pass.p, sentence: `Stop after ${v} loss${v > 1 ? 'es' : ''} in a row instead of ${cur}: ${pct(ref.pass.p)} → ${pct(s.pass.p)}.` });
+    ruleSweeps.push({
+      id: s.id,
+      label: s.label,
+      from: ref.pass.p,
+      to: s.pass.p,
+      delta: s.pass.p - ref.pass.p,
+      sentence: `Stop after ${v} loss${v > 1 ? 'es' : ''} in a row instead of ${cur}: ${pct(ref.pass.p)} → ${pct(s.pass.p)}.`,
+    });
   }
   for (const v of [0.5, 1].filter((x) => Math.abs(x - tr.riskPct) > 1e-9)) {
-    const s = simulateScenario(cfg, { ...reference!, id: `risk_${v}`, label: `Risk ${v}% per trade`, kind: 'rule', trader: { ...tr, riskPct: v } });
+    const s = simulateScenario(cfg, {
+      ...reference!,
+      id: `risk_${v}`,
+      label: `Risk ${v}% per trade`,
+      kind: 'rule',
+      trader: { ...tr, riskPct: v },
+    });
     scenarios.push(s);
-    ruleSweeps.push({ id: s.id, label: s.label, from: ref.pass.p, to: s.pass.p, delta: s.pass.p - ref.pass.p, sentence: `Risk ${v}% per trade instead of ${tr.riskPct}%: ${pct(ref.pass.p)} → ${pct(s.pass.p)}.` });
+    ruleSweeps.push({
+      id: s.id,
+      label: s.label,
+      from: ref.pass.p,
+      to: s.pass.p,
+      delta: s.pass.p - ref.pass.p,
+      sentence: `Risk ${v}% per trade instead of ${tr.riskPct}%: ${pct(ref.pass.p)} → ${pct(s.pass.p)}.`,
+    });
   }
   ruleSweeps.sort((a, b) => b.delta - a.delta);
 

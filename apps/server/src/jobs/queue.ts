@@ -5,7 +5,12 @@ import type { AppCtx } from '../ctx.js';
 
 export type JobKind = 'label_trades' | 'simulate';
 
-export async function enqueue(db: Tx, kind: JobKind, payload: Record<string, unknown>, opts: { maxAttempts?: number } = {}) {
+export async function enqueue(
+  db: Tx,
+  kind: JobKind,
+  payload: Record<string, unknown>,
+  opts: { maxAttempts?: number } = {},
+) {
   const [job] = await db
     .insert(jobs)
     .values({ kind, payload, maxAttempts: opts.maxAttempts ?? 3 })
@@ -15,7 +20,12 @@ export async function enqueue(db: Tx, kind: JobKind, payload: Record<string, unk
 
 /** Atomically claim the next runnable job. Safe with many workers (FOR UPDATE SKIP LOCKED). */
 export async function claimNext(db: Tx, kinds?: JobKind[]): Promise<Job | null> {
-  const kindFilter = kinds?.length ? sql`and kind in (${sql.join(kinds.map((k) => sql`${k}`), sql`, `)})` : sql``;
+  const kindFilter = kinds?.length
+    ? sql`and kind in (${sql.join(
+        kinds.map((k) => sql`${k}`),
+        sql`, `,
+      )})`
+    : sql``;
   const res = await db.execute(sql`
     update jobs set status = 'running', attempts = attempts + 1, locked_at = now(), updated_at = now()
     where id = (
@@ -40,7 +50,11 @@ export async function requeueStale(db: Tx, olderThanMinutes = 10) {
 }
 
 export type JobHandler = (ctx: AppCtx, payload: Record<string, unknown>, job: Job) => Promise<void>;
-export type FinalFailureHandler = (ctx: AppCtx, payload: Record<string, unknown>, error: string) => Promise<void>;
+export type FinalFailureHandler = (
+  ctx: AppCtx,
+  payload: Record<string, unknown>,
+  error: string,
+) => Promise<void>;
 
 export interface HandlerSet {
   run: Record<string, JobHandler>;
@@ -55,7 +69,9 @@ export async function processNext(ctx: AppCtx, handlers: HandlerSet, kinds?: Job
   try {
     if (!handler) throw new Error(`No handler for job kind ${job.kind}`);
     await handler(ctx, job.payload as Record<string, unknown>, job);
-    await ctx.db.execute(sql`update jobs set status = 'done', last_error = null, updated_at = now() where id = ${job.id}`);
+    await ctx.db.execute(
+      sql`update jobs set status = 'done', last_error = null, updated_at = now() where id = ${job.id}`,
+    );
   } catch (err) {
     // Only the message is kept — job payloads hold ids, never note text.
     const message = err instanceof Error ? err.message : String(err);
@@ -65,8 +81,11 @@ export async function processNext(ctx: AppCtx, handlers: HandlerSet, kinds?: Job
       update jobs set status = ${final ? 'failed' : 'queued'}, last_error = ${message.slice(0, 500)},
         run_after = now() + (${backoffSec} || ' seconds')::interval, updated_at = now()
       where id = ${job.id}`);
-    if (final) await handlers.onFinalFailure?.[job.kind]?.(ctx, job.payload as Record<string, unknown>, message);
-    console.error(`[jobs] ${job.kind} ${job.id} failed (attempt ${job.attempts}/${job.maxAttempts}): ${message}`);
+    if (final)
+      await handlers.onFinalFailure?.[job.kind]?.(ctx, job.payload as Record<string, unknown>, message);
+    console.error(
+      `[jobs] ${job.kind} ${job.id} failed (attempt ${job.attempts}/${job.maxAttempts}): ${message}`,
+    );
   }
   return true;
 }
