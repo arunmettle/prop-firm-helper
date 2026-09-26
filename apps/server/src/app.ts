@@ -10,6 +10,7 @@ import { tradeRoutes } from './routes/trades.js';
 import { importRoutes } from './routes/import.js';
 import { settingsRoutes } from './routes/settings.js';
 import { adminRoutes } from './routes/admin.js';
+import { profileRoutes } from './routes/profile.js';
 
 export interface BuildOptions {
   logger?: boolean;
@@ -42,5 +43,6 @@ export async function buildApp(ctx: AppCtx, opts: BuildOptions = {}): Promise<Fa
   await importRoutes(app, ctx);
   await settingsRoutes(app, ctx);
   await adminRoutes(app, ctx);
+  await profileRoutes(app, ctx);
   return app;
 }

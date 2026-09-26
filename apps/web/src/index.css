@@ -29,6 +29,12 @@
   --color-stop-soft: rgb(251 113 133 / 0.12);
   --color-info: #93c5fd;
 
+  /* Chart roles (validated for the dark surface, see docs/DECISIONS.md): diverging pair + neutral midpoint. */
+  --color-viz-pos: #3987e5;
+  --color-viz-neg: #d95926;
+  --color-viz-mid: #6b7785;
+  --color-viz-grid: #1f2833;
+
   --radius-card: 14px;
 }
 

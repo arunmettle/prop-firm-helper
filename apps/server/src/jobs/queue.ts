@@ -3,7 +3,7 @@ import type { Tx } from '../db/client.js';
 import { jobs, type Job } from '../db/schema.js';
 import type { AppCtx } from '../ctx.js';
 
-export type JobKind = 'label_trades' | 'simulate' | 'rebuild_profile';
+export type JobKind = 'label_trades' | 'simulate';
 
 export async function enqueue(db: Tx, kind: JobKind, payload: Record<string, unknown>, opts: { maxAttempts?: number } = {}) {
   const [job] = await db

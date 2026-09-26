@@ -10,3 +10,5 @@
 - **CSV stop-loss is usually the FINAL stop, not the initial one.** If a trader moved the stop wider during the trade, broker exports show the wider stop → risk is overstated and R understated. We drop stops past entry but cannot detect a widened stop. Mitigation: users can edit imported trades; labelled `source=csv`.
 - **CSV timestamps:** the wrong "times are in" zone shifts trades across day boundaries → wrong daily-loss and trading-day counts. The preview shows the parsed times to check.
 - **CSV P&L column may be gross or net** of commission/swap depending on the broker. We import the Profit column as-is.
+- **Plan/tilt classification drives the simulator's pools.** A mislabelled note moves a trade's R between the plan and tilt pools. Uncertain labels fall back to heuristics, and the split counts are shown.
+- **Skipped setups are only visible through unlinked pre-trade checks.** If the user doesn't use the check, P(skip) is 0 by construction, not by evidence.

@@ -5,3 +5,4 @@ export * from './settings.js';
 export * from './trades/index.js';
 export * from './accounts.js';
 export * from './csv/index.js';
+export * from './behaviour/index.js';

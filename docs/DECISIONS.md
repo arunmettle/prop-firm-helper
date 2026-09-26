@@ -31,3 +31,11 @@ One line each: decision — why.
 - Classification failure → `labels_status = failed`, no labels stored, "couldn't classify" in the UI, re-label button. If `keepRawNotes` is off, notes are removed only AFTER a successful classification (a failed trade keeps its note until it can be labelled).
 - Editing a trade re-queues classification (the state includes r_multiple/exit type, which may have changed).
 - Low-confidence values are stored with an `uncertain: true` flag per value; aggregates count them separately.
+- Behaviour profile is computed on request (pure function over the account's closed trades, milliseconds) and the latest snapshot is stored in `behaviour_profiles`; no background job needed.
+- "Plan vs tilt" per trade: Jev's `tilt_behaviour` label decides when present and certain (p ≥ 0.65 = tilt); otherwise transparent heuristics (re-entry within the cooldown after a loss, beyond max trades/day, >1.3× size after a loss, unjustified stop moves). The UI shows how many trades were classified each way.
+- Behaviour events counted per trade in each bucket: size-up (tilt AND risk > 1.3× median risk), extra trade (tilt AND beyond max trades / within cooldown after a loss / FOMO-revenge-boredom note), early manual close (closed_early not justified, or a fear-labelled manual close), widened stop (moved/removed stop not justified), skip (a go/caution pre-trade check never linked to a trade).
+- Consecutive losses for bucketing carry across days; the P&L band is today's realised P&L ("flat" = within ±0.1% of the starting balance).
+- Smoothing: a bucket with n < 8 is padded to 8 pseudo-observations at its neighbours' pooled rate (adjacent loss bucket and adjacent P&L band), falling back to the global rate; raw and smoothed values are both stored and low-data cells are flagged.
+- "Size" in sizing stats = risk amount when ≥ 80% of trades have a stop, otherwise lots. Baseline = median.
+- Sessions by UTC hour: Asia 00–07, London 07–12, New York 12–21 (London/NY overlap counts as NY); configurable in code (`DEFAULT_SESSIONS`).
+- Chart colours: diverging blue (+) / orange (−) with a gray midpoint, validated for CVD and contrast on the dark surface; green/red stay reserved for P&L text and status.
